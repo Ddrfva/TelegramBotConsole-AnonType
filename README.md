@@ -36,20 +36,19 @@
 | ![Основные команды](screenshots/demo1.png) | ![Report и Find](screenshots/demo2.png) |
 
 ## ✅ Критерии выполнения
-|----------|--------|
-| Подключена библиотека `Otus.ToDoList.ConsoleBot`
-| Класс `UpdateHandler` реализует `IUpdateHandler`
-| `ToDoUser` с `TelegramUserId`
-| `IUserService`, `UserService`
-| `IToDoService`, `ToDoService`
-| Команды `/addtask`, `/removetask` с аргументами
-| `/completetask` по `Id`
-| `/showalltasks` со статусами `Active/Completed`
-| Репозитории `IUserRepository`, `IToDoRepository`
-| `InMemoryUserRepository`, `InMemoryToDoRepository`
-| Команда `/report` (кортежи, статистика)
-| Команда `/find` (лямбда, поиск по префиксу)
-| Обновлённый `/help`
+- Подключена библиотека `Otus.ToDoList.ConsoleBot`
+- Класс `UpdateHandler` реализует `IUpdateHandler`
+- `ToDoUser` с `TelegramUserId`
+- `IUserService`, `UserService`
+- `IToDoService`, `ToDoService`
+- Команды `/addtask`, `/removetask` с аргументами
+- `/completetask` по `Id`
+- `/showalltasks` со статусами `Active/Completed`
+- Репозитории `IUserRepository`, `IToDoRepository`
+- `InMemoryUserRepository`, `InMemoryToDoRepository`
+- Команда `/report` (кортежи, статистика)
+- Команда `/find` (лямбда, поиск по префиксу)
+- Обновлённый `/help`
 
 ## 👤 Автор  
 Дорофеева Дарья   
