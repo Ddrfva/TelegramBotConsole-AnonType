@@ -12,9 +12,9 @@ namespace Core.Services
             _toDoRepository = toDoRepository;
         }
 
-        public (int total, int completed, int active, DateTime generatedAt) GetUserStats(Guid userId)
+        public async Task<(int total, int completed, int active, DateTime generatedAt)> GetUserStats(Guid userId, CancellationToken cancellationToken)
         {
-            var allTasks = _toDoRepository.GetAllByUserId(userId);
+            var allTasks = await _toDoRepository.GetAllByUserId(userId, cancellationToken);
             var total = allTasks.Count;
             var completed = allTasks.Count(t => t.State == ToDoItemState.Completed);
             var active = allTasks.Count(t => t.State == ToDoItemState.Active);

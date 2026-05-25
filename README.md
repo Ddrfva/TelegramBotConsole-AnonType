@@ -1,58 +1,41 @@
-# 📝 Консольный бот: Репозитории и отчёты
+# 🤖 Асинхронный консольный бот
 
 ## 📋 Описание
-Консольный бот для управления задачами с поддержкой:
-- Регистрации пользователей
-- Добавления, выполнения, удаления задач
-- Поиска задач по префиксу
-- Статистики по задачам
+Проект представляет собой асинхронного консольного бота для управления задачами. 
+Разработан на основе предыдущих ДЗ с добавлением: асинхронных методов (async/Task, CancellationToken), обработки ошибок через HandleErrorAsync, использования CancellationTokenSource для управления временем жизни бота.
 
-## 🆕 Ключевые изменения (ДЗ №6)
-- Разделение на слои: `Core` (сущности, интерфейсы), `Infrastructure` (репозитории), `TelegramBot` (обработчик)
-- Интерфейсы репозиториев `IUserRepository`, `IToDoRepository`
-- Реализация `InMemoryUserRepository`, `InMemoryToDoRepository`
-- Команда `/report` — статистика по задачам (кортежи)
-- Команда `/find` — поиск задач по префиксу (лямбды)
-- Обновлённая справка `/help`
+## 🚀 Основные изменения (ДЗ №7)
 
-## 🎮 Доступные команды
-| Команда | Описание |
-|---------|----------|
-| `/start` | Начать работу (авторегистрация) |
-| `/help` | Показать справку |
-| `/info` | Информация о программе |
-| `/addtask [текст]` | Добавить задачу |
-| `/showtasks` | Показать активные задачи |
-| `/showalltasks` | Показать все задачи |
-| `/completetask [id]` | Завершить задачу по Id |
-| `/removetask [номер]` | Удалить задачу по номеру |
-| `/report` | Статистика |
-| `/find` | Поиск по началу названия |
-| `/exit` | Выход |
+### 1. Асинхронность интерфейсов и сервисов
+Все методы в IUserRepository, IToDoRepository, IUserService, IToDoService, IToDoReportService переведены на Task<T> и принимают CancellationToken. 
 
-## 📸 Демонстрация работы
-| Основной сценарий | Статистика и поиск |
-|---|---|
-| ![Основные команды](screenshots/demo1.png) | ![Report и Find](screenshots/demo2.png) |
+Пример (IUserRepository.cs): 
+Task<ToDoUser?> GetUser(Guid userId, CancellationToken cancellationToken); 
+Task Add(ToDoUser user, CancellationToken cancellationToken);
+
+### 2. Обработка ошибок
+Реализован метод HandleErrorAsync в UpdateHandler.cs, который выводит ошибки в консоль. 
+
+public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) 
+{ 
+    Console.WriteLine($"[ОШИБКА] {exception.Message}"); 
+    Console.WriteLine(exception.StackTrace); 
+    return Task.CompletedTask; 
+}
+
+### 3. Управление токеном отмены
+В Program.cs добавлен CancellationTokenSource, который передаётся в botClient.StartReceiving(). 
+
+using var cts = new CancellationTokenSource(); 
+botClient.StartReceiving(updateHandler, cts.Token);
 
 ## ✅ Критерии выполнения
-- Подключена библиотека `Otus.ToDoList.ConsoleBot`
-- Класс `UpdateHandler` реализует `IUpdateHandler`
-- `ToDoUser` с `TelegramUserId`
-- `IUserService`, `UserService`
-- `IToDoService`, `ToDoService`
-- Команды `/addtask`, `/removetask` с аргументами
-- `/completetask` по `Id`
-- `/showalltasks` со статусами `Active/Completed`
-- Репозитории `IUserRepository`, `IToDoRepository`
-- `InMemoryUserRepository`, `InMemoryToDoRepository`
-- Команда `/report` (кортежи, статистика)
-- Команда `/find` (лямбда, поиск по префиксу)
-- Обновлённый `/help`
+- Подключена асинхронная библиотека, CancellationToken, HandleErrorAsync
+- Все интерфейсы и сервисы переведены на async/Task/CancellationToken
 
-## 👤 Автор  
-Дорофеева Дарья   
-Дата: 14.05.2026
+## 👤 Автор
+Дорофеева Дарья  
+Дата: 20.05.2026  
 
 ## 📄 Лицензия
 MIT License

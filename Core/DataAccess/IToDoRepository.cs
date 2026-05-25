@@ -4,14 +4,14 @@ namespace Core.DataAccess
 {
     public interface IToDoRepository
     {
-        IReadOnlyList<ToDoItem> GetAllByUserId(Guid userId);
-        IReadOnlyList<ToDoItem> GetActiveByUserId(Guid userId);
-        ToDoItem? Get(Guid id);
-        void Add(ToDoItem item);
-        void Update(ToDoItem item);
-        void Delete(Guid id);
-        bool ExistsByName(Guid userId, string name);
-        int CountActive(Guid userId);
-        IReadOnlyList<ToDoItem> Find(Guid userId, Func<ToDoItem, bool> predicate);
+        Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken cancellationToken);
+        Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken cancellationToken);
+        Task<ToDoItem?> Get(Guid id, CancellationToken cancellationToken);
+        Task Add(ToDoItem item, CancellationToken cancellationToken);
+        Task Update(ToDoItem item, CancellationToken cancellationToken);
+        Task Delete(Guid id, CancellationToken cancellationToken);
+        Task<bool> ExistsByName(Guid userId, string name, CancellationToken cancellationToken);
+        Task<int> CountActive(Guid userId, CancellationToken cancellationToken);
+        Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken cancellationToken);
     }
 }

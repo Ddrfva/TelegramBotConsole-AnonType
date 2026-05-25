@@ -12,20 +12,20 @@ namespace Core.Services
             _userRepository = userRepository;
         }
 
-        public ToDoUser RegisterUser(long telegramUserId, string telegramUserName)
+        public async Task<ToDoUser> RegisterUser(long telegramUserId, string telegramUserName, CancellationToken cancellationToken)
         {
-            var existingUser = _userRepository.GetUserByTelegramUserId(telegramUserId);
+            var existingUser = await _userRepository.GetUserByTelegramUserId(telegramUserId, cancellationToken);
             if (existingUser != null)
                 return existingUser;
 
             var user = new ToDoUser(telegramUserId, telegramUserName);
-            _userRepository.Add(user);
+            await _userRepository.Add(user, cancellationToken);
             return user;
         }
 
-        public ToDoUser? GetUser(long telegramUserId)
+        public async Task<ToDoUser?> GetUser(long telegramUserId, CancellationToken cancellationToken)
         {
-            return _userRepository.GetUserByTelegramUserId(telegramUserId);
+            return await _userRepository.GetUserByTelegramUserId(telegramUserId, cancellationToken);
         }
     }
 }
