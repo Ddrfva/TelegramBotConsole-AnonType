@@ -7,19 +7,20 @@ namespace Infrastructure.DataAccess
     {
         private readonly List<ToDoUser> _users = new();
 
-        public ToDoUser? GetUser(Guid userId)
+        public Task<ToDoUser?> GetUser(Guid userId, CancellationToken cancellationToken)
         {
-            return _users.FirstOrDefault(u => u.UserId == userId);
+            return Task.FromResult(_users.FirstOrDefault(u => u.UserId == userId));
         }
 
-        public ToDoUser? GetUserByTelegramUserId(long telegramUserId)
+        public Task<ToDoUser?> GetUserByTelegramUserId(long telegramUserId, CancellationToken cancellationToken)
         {
-            return _users.FirstOrDefault(u => u.TelegramUserId == telegramUserId);
+            return Task.FromResult(_users.FirstOrDefault(u => u.TelegramUserId == telegramUserId));
         }
 
-        public void Add(ToDoUser user)
+        public Task Add(ToDoUser user, CancellationToken cancellationToken)
         {
             _users.Add(user);
+            return Task.CompletedTask;
         }
     }
 }
