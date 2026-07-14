@@ -1,42 +1,71 @@
-﻿using Otus.ToDoList.ConsoleBot;
-using Core.Services;
-using Core.DataAccess;
-using Infrastructure.DataAccess;
+﻿using dotenv.net;
+using Telegram.Bot;
+using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using TelegramBot_25.Classes;
 
-namespace TelegramBotConsole_Async
+namespace TelegramBot_25
 {
     class Program
     {
         static async Task Main(string[] args)
         {
-            try
+
+            DotEnv.Load();
+
+            var token = Environment.GetEnvironmentVariable("BOT_TOKEN");
+            if (string.IsNullOrEmpty(token))
             {
-                Console.Write("Введите максимальное количество задач (1-100): ");
-                int maxTasks = int.Parse(Console.ReadLine());
-
-                Console.Write("Введите максимальную длину задачи (1-100): ");
-                int maxTaskLength = int.Parse(Console.ReadLine());
-
-                var userRepository = new InMemoryUserRepository();
-                var toDoRepository = new InMemoryToDoRepository();
-
-                var userService = new UserService(userRepository);
-                var todoService = new ToDoService(toDoRepository, userRepository, maxTasks, maxTaskLength);
-                var reportService = new ToDoReportService(toDoRepository);
-
-                var botClient = new ConsoleBotClient();
-                var updateHandler = new UpdateHandler(userService, todoService, reportService);
-
-                using var cts = new CancellationTokenSource();
-                botClient.StartReceiving(updateHandler, cts.Token);
-
-                Console.WriteLine("Бот запущен. Нажмите любую клавишу для выхода...");
-                Console.ReadKey();
-                cts.Cancel();
+                Console.WriteLine("Ошибка: Токен бота не найден. Убедитесь, что файл .env настроен правильно.");
+                return;
             }
-            catch (Exception ex)
+
+            var botClient = new TelegramBotClient(token);
+            var cts = new CancellationTokenSource();
+
+            var receiverOptions = new ReceiverOptions
             {
-                Console.WriteLine($"Критическая ошибка: {ex.Message}");
+                AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery],
+                DropPendingUpdates = true
+            };
+
+            var handler = new UpdateHandler();
+
+            botClient.StartReceiving(
+                handler.HandleUpdateAsync,
+                handler.HandleErrorAsync,
+                receiverOptions,
+                cancellationToken: cts.Token
+            );
+
+            await botClient.SetMyCommands(
+                commands: new[]
+                {
+                    new BotCommand { Command = "start", Description = "Начать работу" },
+                    new BotCommand { Command = "addtask", Description = "Добавить задачу" },
+                    new BotCommand { Command = "showtasks", Description = "Показать активные задачи" },
+                    new BotCommand { Command = "showalltasks", Description = "Показать все задачи" },
+                    new BotCommand { Command = "report", Description = "Статистика" },
+                    new BotCommand { Command = "find", Description = "Найти задачу" },
+                    new BotCommand { Command = "completetask", Description = "Завершить задачу по Id" },
+                },
+                cancellationToken: cts.Token
+            );
+
+            var me = await botClient.GetMe(cancellationToken: cts.Token);
+            Console.WriteLine($"Бот @{me.Username} запущен!");
+            Console.WriteLine("Нажмите клавишу A для выхода");
+
+            while (true)
+            {
+                var key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.A)
+                {
+                    Console.WriteLine("Завершение работы...");
+                    await cts.CancelAsync();
+                    break;
+                }
             }
         }
     }
