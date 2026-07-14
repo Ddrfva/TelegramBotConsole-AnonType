@@ -95,7 +95,6 @@ namespace TelegramBot_25.Classes
                     return;
                 }
 
-                // Точные команды (без аргументов)
                 switch (messageText)
                 {
                     case "/start":

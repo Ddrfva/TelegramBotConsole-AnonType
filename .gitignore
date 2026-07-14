@@ -19,4 +19,4 @@ obj/
 *.temp
 
 # Токен
-*.env
+.env
