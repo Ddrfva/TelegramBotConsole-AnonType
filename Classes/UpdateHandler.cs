@@ -7,7 +7,7 @@ using Core.Entities;
 using Infrastructure.DataAccess;
 using System.Linq;
 
-namespace TelegramBot_25.Classes
+namespace TelegramBot_26.Classes
 {
     public class UpdateHandler
     {
@@ -17,13 +17,11 @@ namespace TelegramBot_25.Classes
         private readonly Dictionary<long, ToDoUser> _users = new();
         private readonly Dictionary<long, bool> _waitingForTaskDescription = new();
 
-        public UpdateHandler()
+        public UpdateHandler(IUserService userService, IToDoService todoService, IToDoReportService reportService)
         {
-            var userRepository = new InMemoryUserRepository();
-            var todoRepository = new InMemoryToDoRepository();
-            _userService = new UserService(userRepository);
-            _todoService = new ToDoService(todoRepository, userRepository, 100, 500);
-            _reportService = new ToDoReportService(todoRepository);
+            _userService = userService;
+            _todoService = todoService;
+            _reportService = reportService;
         }
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -95,6 +93,7 @@ namespace TelegramBot_25.Classes
                     return;
                 }
 
+                // Точные команды (без аргументов)
                 switch (messageText)
                 {
                     case "/start":

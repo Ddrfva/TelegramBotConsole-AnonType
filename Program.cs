@@ -3,15 +3,17 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using TelegramBot_25.Classes;
+using Core.Services;
+using Core.DataAccess;
+using Infrastructure.DataAccess;
+using TelegramBot_26.Classes;
 
-namespace TelegramBot_25
+namespace TelegramBot_26
 {
     class Program
     {
         static async Task Main(string[] args)
         {
-
             DotEnv.Load();
 
             var token = Environment.GetEnvironmentVariable("BOT_TOKEN");
@@ -20,6 +22,15 @@ namespace TelegramBot_25
                 Console.WriteLine("Ошибка: Токен бота не найден. Убедитесь, что файл .env настроен правильно.");
                 return;
             }
+
+            var dataPath = Path.Combine(Environment.CurrentDirectory, "Data");
+
+            var userRepository = new FileUserRepository(Path.Combine(dataPath, "Users"));
+            var todoRepository = new FileToDoRepository(Path.Combine(dataPath, "Tasks"));
+
+            var userService = new UserService(userRepository);
+            var todoService = new ToDoService(todoRepository, userRepository, maxTasks: 100, maxTaskLength: 500);
+            var reportService = new ToDoReportService(todoRepository);
 
             var botClient = new TelegramBotClient(token);
             var cts = new CancellationTokenSource();
@@ -30,7 +41,7 @@ namespace TelegramBot_25
                 DropPendingUpdates = true
             };
 
-            var handler = new UpdateHandler();
+            var handler = new UpdateHandler(userService, todoService, reportService);
 
             botClient.StartReceiving(
                 handler.HandleUpdateAsync,
