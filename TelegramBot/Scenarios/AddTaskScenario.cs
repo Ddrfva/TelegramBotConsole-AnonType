@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Core.Services;
 using Core.Entities;
@@ -32,14 +29,7 @@ namespace TelegramBot_27.TelegramBot.Scenarios
             switch (context.CurrentStep)
             {
                 case null:
-
-                    var user = await _userService.GetUser(userId, ct);
-                    if (user == null)
-                    {
-                        await bot.SendMessage(chatId, "Сначала зарегистрируйтесь через /start", cancellationToken: ct);
-                        return ScenarioResult.Completed;
-                    }
-                    context.Data["User"] = user;
+                    var user = (ToDoUser)context.Data["User"];
                     context.CurrentStep = "Name";
                     await bot.SendMessage(chatId, "Введите название задачи:", replyMarkup: new ReplyKeyboardMarkup(new[] { new KeyboardButton("/cancel") }) { ResizeKeyboard = true }, cancellationToken: ct);
                     return ScenarioResult.Transition;

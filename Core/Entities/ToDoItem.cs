@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Core.Entities
 {
@@ -18,7 +19,10 @@ namespace Core.Entities
         public ToDoItemState State { get; private set; }
         public DateTime? StateChangedAtUtc { get; private set; }
 
+        [JsonIgnore]
         public DateTime CreatedAtLocal => CreatedAtUtc.ToLocalTime();
+
+        [JsonIgnore]
         public DateTime? StateChangedAtLocal => StateChangedAtUtc?.ToLocalTime();
 
         public ToDoItem(ToDoUser user, string name, DateTime deadline)
@@ -30,6 +34,25 @@ namespace Core.Entities
             Deadline = deadline.ToUniversalTime();
             State = ToDoItemState.Active;
             StateChangedAtUtc = null;
+        }
+
+        [JsonConstructor]
+        public ToDoItem(
+            Guid id,
+            ToDoUser user,
+            string name,
+            DateTime createdAtUtc,
+            DateTime deadline,
+            ToDoItemState state,
+            DateTime? stateChangedAtUtc)
+        {
+            Id = id;
+            User = user;
+            Name = name;
+            CreatedAtUtc = createdAtUtc;
+            Deadline = deadline;
+            State = state;
+            StateChangedAtUtc = stateChangedAtUtc;
         }
 
         public void Complete()

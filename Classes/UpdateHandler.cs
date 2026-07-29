@@ -56,7 +56,6 @@ namespace TelegramBot_27.TelegramBot
                     }
                 }
 
-                // Проверка на команду /cancel (всегда обрабатывается первой)
                 if (messageText == "/cancel")
                 {
                     await _contextRepository.ResetContext(telegramUserId, cancellationToken);
@@ -64,7 +63,6 @@ namespace TelegramBot_27.TelegramBot
                     return;
                 }
 
-                // Проверка активного сценария
                 var context = await _contextRepository.GetContext(telegramUserId, cancellationToken);
                 if (context != null && context.CurrentScenario != ScenarioType.None)
                 {
@@ -72,7 +70,34 @@ namespace TelegramBot_27.TelegramBot
                     return;
                 }
 
-                // Обычные команды
+                if (messageText.StartsWith("/completetask"))
+                {
+                    var parts = messageText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length < 2)
+                    {
+                        await botClient.SendMessage(chatId, "Укажите Id задачи. Пример: /completetask 66b7c15b-8627-49db-aece-fe087b4b4095", cancellationToken: cancellationToken);
+                        return;
+                    }
+
+                    var taskIdString = parts[1];
+                    if (!Guid.TryParse(taskIdString, out Guid taskId))
+                    {
+                        await botClient.SendMessage(chatId, "Неверный формат Id. Id должен быть в формате GUID.", cancellationToken: cancellationToken);
+                        return;
+                    }
+
+                    try
+                    {
+                        await _todoService.MarkCompleted(taskId, cancellationToken);
+                        await botClient.SendMessage(chatId, $"Задача с Id `{taskId}` завершена.", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, cancellationToken: cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        await botClient.SendMessage(chatId, $"Ошибка при завершении задачи: {ex.Message}", cancellationToken: cancellationToken);
+                    }
+                    return;
+                }
+
                 var replyKeyboard = GetMainKeyboard();
 
                 switch (messageText)
@@ -83,6 +108,7 @@ namespace TelegramBot_27.TelegramBot
 
                     case "/addtask":
                         var newContext = new ScenarioContext(ScenarioType.AddTask);
+                        newContext.Data["User"] = user;
                         await _contextRepository.SetContext(telegramUserId, newContext, cancellationToken);
                         await ProcessScenario(botClient, newContext, message, cancellationToken);
                         break;
