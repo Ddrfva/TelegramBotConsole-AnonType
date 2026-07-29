@@ -6,9 +6,10 @@ using Telegram.Bot.Types.Enums;
 using Core.Services;
 using Core.DataAccess;
 using Infrastructure.DataAccess;
-using TelegramBot_26.Classes;
+using TelegramBot_27_2.Classes;
+using TelegramBot_27_2.Scenarios;
 
-namespace TelegramBot_26
+namespace TelegramBot_27_2
 {
     class Program
     {
@@ -19,18 +20,25 @@ namespace TelegramBot_26
             var token = Environment.GetEnvironmentVariable("BOT_TOKEN");
             if (string.IsNullOrEmpty(token))
             {
-                Console.WriteLine("Ошибка: Токен бота не найден. Убедитесь, что файл .env настроен правильно.");
+                Console.WriteLine("Ошибка: Токен бота не найден.");
                 return;
             }
 
             var dataPath = Path.Combine(Environment.CurrentDirectory, "Data");
-
             var userRepository = new FileUserRepository(Path.Combine(dataPath, "Users"));
             var todoRepository = new FileToDoRepository(Path.Combine(dataPath, "Tasks"));
 
             var userService = new UserService(userRepository);
             var todoService = new ToDoService(todoRepository, userRepository, maxTasks: 100, maxTaskLength: 500);
             var reportService = new ToDoReportService(todoRepository);
+
+            var contextRepository = new InMemoryScenarioContextRepository();
+            var scenarios = new List<IScenario>
+            {
+                new AddTaskScenario(userService, todoService)
+            };
+
+            var handler = new UpdateHandler(userService, todoService, reportService, contextRepository, scenarios);
 
             var botClient = new TelegramBotClient(token);
             var cts = new CancellationTokenSource();
@@ -40,8 +48,6 @@ namespace TelegramBot_26
                 AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery],
                 DropPendingUpdates = true
             };
-
-            var handler = new UpdateHandler(userService, todoService, reportService);
 
             botClient.StartReceiving(
                 handler.HandleUpdateAsync,

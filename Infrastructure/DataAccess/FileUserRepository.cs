@@ -32,6 +32,9 @@ namespace Infrastructure.DataAccess
 
         public async Task<ToDoUser?> GetUserByTelegramUserId(long telegramUserId, CancellationToken cancellationToken)
         {
+            if (!Directory.Exists(_basePath))
+                return null;
+
             foreach (var file in Directory.GetFiles(_basePath, "*.json"))
             {
                 var json = await File.ReadAllTextAsync(file, cancellationToken);
