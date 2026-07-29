@@ -2,17 +2,27 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Core.Services;
+<<<<<<< HEAD
 using Core.Entities;
 using TelegramBot_27.TelegramBot.Scenarios;
 using System.Linq;
 
 namespace TelegramBot_27.TelegramBot
+=======
+using Core.DataAccess;
+using Core.Entities;
+using Infrastructure.DataAccess;
+using System.Linq;
+
+namespace TelegramBot_26.Classes
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
 {
     public class UpdateHandler
     {
         private readonly IUserService _userService;
         private readonly IToDoService _todoService;
         private readonly IToDoReportService _reportService;
+<<<<<<< HEAD
         private readonly IScenarioContextRepository _contextRepository;
         private readonly IEnumerable<IScenario> _scenarios;
         private readonly Dictionary<long, ToDoUser> _users = new();
@@ -23,12 +33,21 @@ namespace TelegramBot_27.TelegramBot
             IToDoReportService reportService,
             IScenarioContextRepository contextRepository,
             IEnumerable<IScenario> scenarios)
+=======
+        private readonly Dictionary<long, ToDoUser> _users = new();
+        private readonly Dictionary<long, bool> _waitingForTaskDescription = new();
+
+        public UpdateHandler(IUserService userService, IToDoService todoService, IToDoReportService reportService)
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
         {
             _userService = userService;
             _todoService = todoService;
             _reportService = reportService;
+<<<<<<< HEAD
             _contextRepository = contextRepository;
             _scenarios = scenarios;
+=======
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
         }
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -44,6 +63,7 @@ namespace TelegramBot_27.TelegramBot
 
                 if (!_users.TryGetValue(telegramUserId, out var user))
                 {
+<<<<<<< HEAD
                     user = await _userService.GetUser(telegramUserId, cancellationToken);
                     if (user == null)
                     {
@@ -71,6 +91,37 @@ namespace TelegramBot_27.TelegramBot
                 }
 
                 if (messageText.StartsWith("/completetask"))
+=======
+                    user = await _userService.RegisterUser(telegramUserId, telegramUserName, cancellationToken);
+                    _users[telegramUserId] = user;
+                }
+
+                var replyKeyboard = GetReplyKeyboard(user != null);
+
+                if (_waitingForTaskDescription.TryGetValue(chatId, out bool waiting) && waiting)
+                {
+                    _waitingForTaskDescription[chatId] = false;
+
+                    if (string.IsNullOrWhiteSpace(messageText))
+                    {
+                        await botClient.SendMessage(chatId, "Описание задачи не может быть пустым.", cancellationToken: cancellationToken);
+                        return;
+                    }
+
+                    try
+                    {
+                        var newTask = await _todoService.Add(user, messageText, cancellationToken);
+                        await botClient.SendMessage(chatId, $"Задача \"{messageText}\" добавлена. Id: `{newTask.Id}`", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, cancellationToken: cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        await botClient.SendMessage(chatId, $"Ошибка: {ex.Message}", cancellationToken: cancellationToken);
+                    }
+                    return;
+                }
+
+                if (messageText.StartsWith("/completetask "))
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
                 {
                     var parts = messageText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length < 2)
@@ -98,8 +149,12 @@ namespace TelegramBot_27.TelegramBot
                     return;
                 }
 
+<<<<<<< HEAD
                 var replyKeyboard = GetMainKeyboard();
 
+=======
+                // Точные команды (без аргументов)
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
                 switch (messageText)
                 {
                     case "/start":
@@ -107,10 +162,15 @@ namespace TelegramBot_27.TelegramBot
                         break;
 
                     case "/addtask":
+<<<<<<< HEAD
                         var newContext = new ScenarioContext(ScenarioType.AddTask);
                         newContext.Data["User"] = user;
                         await _contextRepository.SetContext(telegramUserId, newContext, cancellationToken);
                         await ProcessScenario(botClient, newContext, message, cancellationToken);
+=======
+                        _waitingForTaskDescription[chatId] = true;
+                        await botClient.SendMessage(chatId, "Введите описание задачи:", cancellationToken: cancellationToken);
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
                         break;
 
                     case "/showtasks":
@@ -123,7 +183,11 @@ namespace TelegramBot_27.TelegramBot
                         {
                             var response = "Активные задачи:\n";
                             foreach (var task in activeTasks)
+<<<<<<< HEAD
                                 response += $"{task.Name} - Дедлайн: {task.Deadline:dd.MM.yyyy} - `{task.Id}`\n";
+=======
+                                response += $"{task.Name} - `{task.Id}`\n";
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
                             await botClient.SendMessage(chatId, response, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, cancellationToken: cancellationToken);
                         }
                         break;
@@ -138,7 +202,11 @@ namespace TelegramBot_27.TelegramBot
                         {
                             var response = "Все задачи:\n";
                             foreach (var task in allTasks)
+<<<<<<< HEAD
                                 response += $"{task.State} - {task.Name} - Дедлайн: {task.Deadline:dd.MM.yyyy} - `{task.Id}`\n";
+=======
+                                response += $"{task.State} - {task.Name} - `{task.Id}`\n";
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
                             await botClient.SendMessage(chatId, response, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, cancellationToken: cancellationToken);
                         }
                         break;
@@ -159,6 +227,7 @@ namespace TelegramBot_27.TelegramBot
             }
         }
 
+<<<<<<< HEAD
         private async Task ProcessScenario(ITelegramBotClient botClient, ScenarioContext context, Message message, CancellationToken ct)
         {
             var scenario = GetScenario(context.CurrentScenario);
@@ -188,6 +257,23 @@ namespace TelegramBot_27.TelegramBot
                 new KeyboardButton[] { "/completetask", "/exit" }
             })
             { ResizeKeyboard = true };
+=======
+        private ReplyKeyboardMarkup GetReplyKeyboard(bool isRegistered)
+        {
+            var buttons = new List<List<KeyboardButton>>();
+
+            if (!isRegistered)
+            {
+                buttons.Add([new KeyboardButton("/start")]);
+            }
+            else
+            {
+                buttons.Add([new KeyboardButton("/showtasks"), new KeyboardButton("/showalltasks")]);
+                buttons.Add([new KeyboardButton("/report")]);
+            }
+
+            return new ReplyKeyboardMarkup(buttons) { ResizeKeyboard = true };
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
         }
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

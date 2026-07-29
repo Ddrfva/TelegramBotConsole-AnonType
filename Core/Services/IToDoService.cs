@@ -6,7 +6,11 @@ namespace Core.Services
     {
         Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken cancellationToken);
         Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken cancellationToken);
+<<<<<<< HEAD
         Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, CancellationToken cancellationToken); // Добавлен deadline
+=======
+        Task<ToDoItem> Add(ToDoUser user, string name, CancellationToken cancellationToken);
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
         Task MarkCompleted(Guid id, CancellationToken cancellationToken);
         Task Delete(Guid id, CancellationToken cancellationToken);
         Task<IReadOnlyList<ToDoItem>> Find(ToDoUser user, string namePrefix, CancellationToken cancellationToken);

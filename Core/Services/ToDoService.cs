@@ -29,7 +29,11 @@ namespace Core.Services
             return await _toDoRepository.GetActiveByUserId(userId, cancellationToken);
         }
 
+<<<<<<< HEAD
         public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, CancellationToken cancellationToken)
+=======
+        public async Task<ToDoItem> Add(ToDoUser user, string name, CancellationToken cancellationToken)
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Название задачи не может быть пустым");
@@ -44,7 +48,11 @@ namespace Core.Services
             if (activeCount >= _maxTasks)
                 throw new TaskCountLimitException(_maxTasks);
 
+<<<<<<< HEAD
             var newTask = new ToDoItem(user, name, deadline);
+=======
+            var newTask = new ToDoItem(user, name);
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
             await _toDoRepository.Add(newTask, cancellationToken);
             return newTask;
         }

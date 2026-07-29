@@ -13,8 +13,11 @@ namespace Infrastructure.DataAccess
         public FileToDoRepository(string basePath)
         {
             _basePath = basePath;
+<<<<<<< HEAD
             if (!Directory.Exists(_basePath))
                 Directory.CreateDirectory(_basePath);
+=======
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
             _indexFilePath = Path.Combine(_basePath, "index.json");
             LoadIndex();
         }
@@ -95,10 +98,14 @@ namespace Infrastructure.DataAccess
                     if (item != null)
                         items.Add(item);
                 }
+<<<<<<< HEAD
                 catch
                 {
                     // Пропуск поврежденных файлов
                 }
+=======
+                catch { /* Пропускаем повреждённые файлы */ }
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
             }
             return items;
         }
@@ -111,6 +118,7 @@ namespace Infrastructure.DataAccess
 
         public async Task<ToDoItem?> Get(Guid id, CancellationToken cancellationToken)
         {
+<<<<<<< HEAD
             if (!Directory.Exists(_basePath))
                 return null;
 
@@ -131,6 +139,17 @@ namespace Infrastructure.DataAccess
                 }
             }
             return null;
+=======
+            if (!_index.TryGetValue(id, out Guid userId))
+                return null;
+
+            var filePath = GetItemFilePath(userId, id);
+            if (!File.Exists(filePath))
+                return null;
+
+            var json = await File.ReadAllTextAsync(filePath, cancellationToken);
+            return JsonSerializer.Deserialize<ToDoItem>(json);
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
         }
 
         public async Task Add(ToDoItem item, CancellationToken cancellationToken)

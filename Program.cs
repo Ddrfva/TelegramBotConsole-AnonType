@@ -6,10 +6,16 @@ using Telegram.Bot.Types.Enums;
 using Core.Services;
 using Core.DataAccess;
 using Infrastructure.DataAccess;
+<<<<<<< HEAD
 using TelegramBot_27.TelegramBot;
 using TelegramBot_27.TelegramBot.Scenarios;
 
 namespace TelegramBot_27
+=======
+using TelegramBot_26.Classes;
+
+namespace TelegramBot_26
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
 {
     class Program
     {
@@ -20,11 +26,19 @@ namespace TelegramBot_27
             var token = Environment.GetEnvironmentVariable("BOT_TOKEN");
             if (string.IsNullOrEmpty(token))
             {
+<<<<<<< HEAD
                 Console.WriteLine("Ошибка: Токен бота не найден.");
+=======
+                Console.WriteLine("Ошибка: Токен бота не найден. Убедитесь, что файл .env настроен правильно.");
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
                 return;
             }
 
             var dataPath = Path.Combine(Environment.CurrentDirectory, "Data");
+<<<<<<< HEAD
+=======
+
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
             var userRepository = new FileUserRepository(Path.Combine(dataPath, "Users"));
             var todoRepository = new FileToDoRepository(Path.Combine(dataPath, "Tasks"));
 
@@ -32,6 +46,7 @@ namespace TelegramBot_27
             var todoService = new ToDoService(todoRepository, userRepository, maxTasks: 100, maxTaskLength: 500);
             var reportService = new ToDoReportService(todoRepository);
 
+<<<<<<< HEAD
             var contextRepository = new InMemoryScenarioContextRepository();
             var scenarios = new List<IScenario>
             {
@@ -40,6 +55,8 @@ namespace TelegramBot_27
 
             var handler = new UpdateHandler(userService, todoService, reportService, contextRepository, scenarios);
 
+=======
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
             var botClient = new TelegramBotClient(token);
             var cts = new CancellationTokenSource();
 
@@ -49,6 +66,11 @@ namespace TelegramBot_27
                 DropPendingUpdates = true
             };
 
+<<<<<<< HEAD
+=======
+            var handler = new UpdateHandler(userService, todoService, reportService);
+
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
             botClient.StartReceiving(
                 handler.HandleUpdateAsync,
                 handler.HandleErrorAsync,

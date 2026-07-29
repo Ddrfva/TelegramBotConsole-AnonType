@@ -1,4 +1,10 @@
 ﻿using System;
+<<<<<<< HEAD
+=======
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
 using System.Threading.Tasks;
 using Core.Services;
 using Core.Entities;
@@ -29,7 +35,18 @@ namespace TelegramBot_27.TelegramBot.Scenarios
             switch (context.CurrentStep)
             {
                 case null:
+<<<<<<< HEAD
                     var user = (ToDoUser)context.Data["User"];
+=======
+
+                    var user = await _userService.GetUser(userId, ct);
+                    if (user == null)
+                    {
+                        await bot.SendMessage(chatId, "Сначала зарегистрируйтесь через /start", cancellationToken: ct);
+                        return ScenarioResult.Completed;
+                    }
+                    context.Data["User"] = user;
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989
                     context.CurrentStep = "Name";
                     await bot.SendMessage(chatId, "Введите название задачи:", replyMarkup: new ReplyKeyboardMarkup(new[] { new KeyboardButton("/cancel") }) { ResizeKeyboard = true }, cancellationToken: ct);
                     return ScenarioResult.Transition;
