@@ -1,0 +1,29 @@
+# Временные файлы Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+
+# Результаты компиляции
+*.exe
+*.dll
+*.pdb
+
+# Логи
+*.log
+
+# Временные файлы
+*.tmp
+*.temp
+
+# Токен
+<<<<<<< HEAD
+.env
+
+# Локальные данные
+Data/
+=======
+.env
+>>>>>>> 612ae305cfc875d783b7d13ecc54187068b59989

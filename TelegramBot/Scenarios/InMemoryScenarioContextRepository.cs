@@ -1,0 +1,29 @@
+﻿using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace TelegramBot_27_2.Scenarios
+{
+    public class InMemoryScenarioContextRepository : IScenarioContextRepository
+    {
+        private readonly ConcurrentDictionary<long, ScenarioContext> _storage = new();
+
+        public Task<ScenarioContext?> GetContext(long userId, CancellationToken ct)
+        {
+            _storage.TryGetValue(userId, out var context);
+            return Task.FromResult(context);
+        }
+
+        public Task SetContext(long userId, ScenarioContext context, CancellationToken ct)
+        {
+            _storage[userId] = context;
+            return Task.CompletedTask;
+        }
+
+        public Task ResetContext(long userId, CancellationToken ct)
+        {
+            _storage.TryRemove(userId, out _);
+            return Task.CompletedTask;
+        }
+    }
+}
