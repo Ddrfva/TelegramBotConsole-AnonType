@@ -9,20 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Infrastructure\DataAccess\TelegramBot_25\**" />
-    <EmbeddedResource Remove="Infrastructure\DataAccess\TelegramBot_25\**" />
-    <None Remove="Infrastructure\DataAccess\TelegramBot_25\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="dotenv.net" Version="4.0.2" />
-    <PackageReference Include="Telegram.Bot" Version="22.10.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Otus.ToDoList.ConsoleBot">
-      <HintPath>C:\Users\Daria\Desktop\C-Sharp-Basic-main\C-Sharp-Basic-main\Homeworks\07 Асинхронность, делегаты и события\Otus.ToDoList.ConsoleBot\bin\Debug\net8.0\Otus.ToDoList.ConsoleBot.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Telegram.Bot" Version="22.10.2.1" />
   </ItemGroup>
 
   <ItemGroup>
