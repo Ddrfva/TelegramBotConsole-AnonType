@@ -6,10 +6,10 @@ using Telegram.Bot.Types.Enums;
 using Core.Services;
 using Core.DataAccess;
 using Infrastructure.DataAccess;
-using TelegramBot_27_2.Classes;
-using TelegramBot_27_2.Scenarios;
+using TelegramBot_28.TelegramBot;
+using TelegramBot_28.TelegramBot.Scenarios;
 
-namespace TelegramBot_27_2
+namespace TelegramBot_28
 {
     class Program
     {
@@ -24,21 +24,28 @@ namespace TelegramBot_27_2
                 return;
             }
 
-            var dataPath = Path.Combine(Environment.CurrentDirectory, "Data");
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+            var dataPath = Path.Combine(basePath, "Data");
+
             var userRepository = new FileUserRepository(Path.Combine(dataPath, "Users"));
             var todoRepository = new FileToDoRepository(Path.Combine(dataPath, "Tasks"));
+            var listRepository = new InMemoryToDoListRepository();
 
             var userService = new UserService(userRepository);
             var todoService = new ToDoService(todoRepository, userRepository, maxTasks: 100, maxTaskLength: 500);
             var reportService = new ToDoReportService(todoRepository);
+            var listService = new ToDoListService(listRepository);
 
             var contextRepository = new InMemoryScenarioContextRepository();
+
             var scenarios = new List<IScenario>
             {
-                new AddTaskScenario(userService, todoService)
+                new AddTaskScenario(userService, todoService, listService),
+                new AddListScenario(userService, listService),
+                new DeleteListScenario(userService, listService, todoService) // ← ДОБАВЛЕНО!
             };
 
-            var handler = new UpdateHandler(userService, todoService, reportService, contextRepository, scenarios);
+            var handler = new UpdateHandler(userService, todoService, reportService, listService, contextRepository, scenarios);
 
             var botClient = new TelegramBotClient(token);
             var cts = new CancellationTokenSource();
@@ -61,8 +68,7 @@ namespace TelegramBot_27_2
                 {
                     new BotCommand { Command = "start", Description = "Начать работу" },
                     new BotCommand { Command = "addtask", Description = "Добавить задачу" },
-                    new BotCommand { Command = "showtasks", Description = "Показать активные задачи" },
-                    new BotCommand { Command = "showalltasks", Description = "Показать все задачи" },
+                    new BotCommand { Command = "show", Description = "Показать задачи по спискам" },
                     new BotCommand { Command = "report", Description = "Статистика" },
                     new BotCommand { Command = "find", Description = "Найти задачу" },
                     new BotCommand { Command = "completetask", Description = "Завершить задачу по Id" },

@@ -18,6 +18,7 @@ namespace Core.Entities
         public DateTime Deadline { get; private set; }
         public ToDoItemState State { get; private set; }
         public DateTime? StateChangedAtUtc { get; private set; }
+        public ToDoList? List { get; private set; }
 
         [JsonIgnore]
         public DateTime CreatedAtLocal => CreatedAtUtc.ToLocalTime();
@@ -25,7 +26,7 @@ namespace Core.Entities
         [JsonIgnore]
         public DateTime? StateChangedAtLocal => StateChangedAtUtc?.ToLocalTime();
 
-        public ToDoItem(ToDoUser user, string name, DateTime deadline)
+        public ToDoItem(ToDoUser user, string name, DateTime deadline, ToDoList? list = null)
         {
             Id = Guid.NewGuid();
             User = user;
@@ -34,6 +35,7 @@ namespace Core.Entities
             Deadline = deadline.ToUniversalTime();
             State = ToDoItemState.Active;
             StateChangedAtUtc = null;
+            List = list;
         }
 
         [JsonConstructor]
@@ -44,7 +46,8 @@ namespace Core.Entities
             DateTime createdAtUtc,
             DateTime deadline,
             ToDoItemState state,
-            DateTime? stateChangedAtUtc)
+            DateTime? stateChangedAtUtc,
+            ToDoList? list)
         {
             Id = id;
             User = user;
@@ -53,6 +56,7 @@ namespace Core.Entities
             Deadline = deadline;
             State = state;
             StateChangedAtUtc = stateChangedAtUtc;
+            List = list;
         }
 
         public void Complete()
