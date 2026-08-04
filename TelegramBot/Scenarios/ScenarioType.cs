@@ -1,8 +1,10 @@
-﻿namespace TelegramBot_27_2.Scenarios
+﻿namespace TelegramBot_28.TelegramBot.Scenarios
 {
     public enum ScenarioType
     {
         None,
-        AddTask
+        AddTask,
+        AddList,
+        DeleteList
     }
 }
