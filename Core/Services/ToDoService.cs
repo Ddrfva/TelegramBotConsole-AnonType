@@ -29,7 +29,7 @@ namespace Core.Services
             return await _toDoRepository.GetActiveByUserId(userId, cancellationToken);
         }
 
-        public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, CancellationToken cancellationToken)
+        public async Task<ToDoItem> Add(ToDoUser user, string name, DateTime deadline, ToDoList? list, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Название задачи не может быть пустым");
@@ -44,7 +44,7 @@ namespace Core.Services
             if (activeCount >= _maxTasks)
                 throw new TaskCountLimitException(_maxTasks);
 
-            var newTask = new ToDoItem(user, name, deadline);
+            var newTask = new ToDoItem(user, name, deadline, list);
             await _toDoRepository.Add(newTask, cancellationToken);
             return newTask;
         }
@@ -67,6 +67,14 @@ namespace Core.Services
         public async Task<IReadOnlyList<ToDoItem>> Find(ToDoUser user, string namePrefix, CancellationToken cancellationToken)
         {
             return await _toDoRepository.Find(user.UserId, t => t.Name.StartsWith(namePrefix), cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct)
+        {
+            var allTasks = await _toDoRepository.GetAllByUserId(userId, ct);
+            if (listId == null)
+                return allTasks.Where(t => t.List == null).ToList();
+            return allTasks.Where(t => t.List != null && t.List.Id == listId).ToList();
         }
     }
 }

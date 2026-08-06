@@ -1,22 +1,26 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Core.Services;
 using Core.Entities;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot_28.TelegramBot.Dto;
 
-namespace TelegramBot_27_2.Scenarios
+namespace TelegramBot_28.TelegramBot.Scenarios
 {
     public class AddTaskScenario : IScenario
     {
         private readonly IUserService _userService;
         private readonly IToDoService _todoService;
+        private readonly IToDoListService _listService;
 
-        public AddTaskScenario(IUserService userService, IToDoService todoService)
+        public AddTaskScenario(IUserService userService, IToDoService todoService, IToDoListService listService)
         {
             _userService = userService;
             _todoService = todoService;
+            _listService = listService;
         }
 
         public bool CanHandle(ScenarioType scenario) => scenario == ScenarioType.AddTask;
@@ -56,17 +60,24 @@ namespace TelegramBot_27_2.Scenarios
 
                     var userObj = (ToDoUser)context.Data["User"];
                     var taskNameObj = (string)context.Data["TaskName"];
+                    context.Data["Deadline"] = deadline;
 
-                    try
-                    {
-                        var newTask = await _todoService.Add(userObj, taskNameObj, deadline, ct);
-                        await bot.SendMessage(chatId, $"Задача \"{taskNameObj}\" добавлена. Дедлайн: {deadline:dd.MM.yyyy}. Id: `{newTask.Id}`", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, cancellationToken: ct);
-                    }
-                    catch (Exception ex)
-                    {
-                        await bot.SendMessage(chatId, $"Ошибка: {ex.Message}", cancellationToken: ct);
-                    }
+                    var lists = await _listService.GetUserLists(userObj.UserId, ct);
+                    Console.WriteLine($"[DEBUG] AddTaskScenario: Получено списков: {lists.Count}");
 
+                    var buttons = lists.Select(list =>
+                        InlineKeyboardButton.WithCallbackData(list.Name, new ToDoListCallbackDto("selectlist", list.Id).ToString())
+                    ).ToList();
+
+                    buttons.Insert(0, InlineKeyboardButton.WithCallbackData("📌Без списка", new ToDoListCallbackDto("selectlist", null).ToString()));
+
+                    var keyboard = new InlineKeyboardMarkup(buttons.Select(b => new[] { b }));
+
+                    await bot.SendMessage(chatId, "Выберите список для задачи:", replyMarkup: keyboard, cancellationToken: ct);
+                    context.CurrentStep = "SelectList";
+                    return ScenarioResult.Transition;
+
+                case "SelectList":
                     return ScenarioResult.Completed;
 
                 default:
