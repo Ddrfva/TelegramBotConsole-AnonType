@@ -6,10 +6,10 @@ using Telegram.Bot.Types.Enums;
 using Core.Services;
 using Core.DataAccess;
 using Infrastructure.DataAccess;
-using TelegramBot_28.TelegramBot;
-using TelegramBot_28.TelegramBot.Scenarios;
+using TelegramBot_29.TelegramBot;
+using TelegramBot_29.TelegramBot.Scenarios;
 
-namespace TelegramBot_28
+namespace TelegramBot_29
 {
     class Program
     {
@@ -42,7 +42,8 @@ namespace TelegramBot_28
             {
                 new AddTaskScenario(userService, todoService, listService),
                 new AddListScenario(userService, listService),
-                new DeleteListScenario(userService, listService, todoService) // ← ДОБАВЛЕНО!
+                new DeleteListScenario(userService, listService, todoService),
+                new DeleteTaskScenario(todoService)
             };
 
             var handler = new UpdateHandler(userService, todoService, reportService, listService, contextRepository, scenarios);
@@ -70,8 +71,6 @@ namespace TelegramBot_28
                     new BotCommand { Command = "addtask", Description = "Добавить задачу" },
                     new BotCommand { Command = "show", Description = "Показать задачи по спискам" },
                     new BotCommand { Command = "report", Description = "Статистика" },
-                    new BotCommand { Command = "find", Description = "Найти задачу" },
-                    new BotCommand { Command = "completetask", Description = "Завершить задачу по Id" },
                 },
                 cancellationToken: cts.Token
             );

@@ -6,9 +6,9 @@ using Core.Entities;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBot_28.TelegramBot.Dto;
+using TelegramBot_29.TelegramBot.Dto;
 
-namespace TelegramBot_28.TelegramBot.Scenarios
+namespace TelegramBot_29.TelegramBot.Scenarios
 {
     public class AddTaskScenario : IScenario
     {
@@ -63,8 +63,6 @@ namespace TelegramBot_28.TelegramBot.Scenarios
                     context.Data["Deadline"] = deadline;
 
                     var lists = await _listService.GetUserLists(userObj.UserId, ct);
-                    Console.WriteLine($"[DEBUG] AddTaskScenario: Получено списков: {lists.Count}");
-
                     var buttons = lists.Select(list =>
                         InlineKeyboardButton.WithCallbackData(list.Name, new ToDoListCallbackDto("selectlist", list.Id).ToString())
                     ).ToList();

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TelegramBot_28.TelegramBot.Dto
+namespace TelegramBot_29.TelegramBot.Dto
 {
     public class ToDoListCallbackDto : CallbackDto
     {
@@ -27,7 +27,7 @@ namespace TelegramBot_28.TelegramBot.Dto
 
         public override string ToString()
         {
-            return $"{base.ToString()}|{ToDoListId}";
+            return ToDoListId.HasValue ? $"{base.ToString()}|{ToDoListId}" : base.ToString();
         }
     }
 }
