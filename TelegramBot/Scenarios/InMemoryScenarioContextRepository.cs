@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TelegramBot_28.TelegramBot.Scenarios
+namespace TelegramBot_29.TelegramBot.Scenarios
 {
     public class InMemoryScenarioContextRepository : IScenarioContextRepository
     {

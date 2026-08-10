@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TelegramBot_28.TelegramBot.Dto
+﻿namespace TelegramBot_29.TelegramBot.Dto
 {
     public class CallbackDto
     {

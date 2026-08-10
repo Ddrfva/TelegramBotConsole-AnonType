@@ -76,5 +76,10 @@ namespace Core.Services
                 return allTasks.Where(t => t.List == null).ToList();
             return allTasks.Where(t => t.List != null && t.List.Id == listId).ToList();
         }
+
+        public async Task<ToDoItem?> Get(Guid toDoItemId, CancellationToken ct)
+        {
+            return await _toDoRepository.Get(toDoItemId, ct);
+        }
     }
 }

@@ -7,7 +7,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace TelegramBot_28.TelegramBot.Scenarios
+namespace TelegramBot_29.TelegramBot.Scenarios
 {
     public class DeleteListScenario : IScenario
     {
@@ -38,7 +38,6 @@ namespace TelegramBot_28.TelegramBot.Scenarios
                         await bot.SendMessage(chatId, "Сначала зарегистрируйтесь через /start", cancellationToken: ct);
                         return ScenarioResult.Completed;
                     }
-                    context.Data["User"] = user;
 
                     var lists = await _listService.GetUserLists(user.UserId, ct);
                     if (!lists.Any())
@@ -50,7 +49,6 @@ namespace TelegramBot_28.TelegramBot.Scenarios
                     var buttons = lists.Select(list =>
                     {
                         var callbackData = $"delete_{list.Id}";
-                        Console.WriteLine($"[DEBUG] Создаю кнопку: {list.Name}, callbackData: {callbackData}");
                         return InlineKeyboardButton.WithCallbackData($"❌ {list.Name}", callbackData);
                     }).ToList();
 
