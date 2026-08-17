@@ -16,7 +16,7 @@ namespace Infrastructure.DataAccess
 
         public Task<IReadOnlyList<ToDoList>> GetByUserId(Guid userId, CancellationToken ct)
         {
-            var lists = _storage.Values.Where(l => l.User.UserId == userId).ToList();
+            var lists = _storage.Values.Where(l => l.UserId == userId).ToList();
             return Task.FromResult<IReadOnlyList<ToDoList>>(lists);
         }
 
@@ -34,7 +34,7 @@ namespace Infrastructure.DataAccess
 
         public Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
         {
-            var exists = _storage.Values.Any(l => l.User.UserId == userId && l.Name == name);
+            var exists = _storage.Values.Any(l => l.UserId == userId && l.Name == name);
             return Task.FromResult(exists);
         }
     }

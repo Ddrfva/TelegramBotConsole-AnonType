@@ -9,12 +9,12 @@ namespace Infrastructure.DataAccess
 
         public Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken cancellationToken)
         {
-            return Task.FromResult<IReadOnlyList<ToDoItem>>(_tasks.Where(t => t.User.UserId == userId).ToList());
+            return Task.FromResult<IReadOnlyList<ToDoItem>>(_tasks.Where(t => t.UserId == userId).ToList());
         }
 
         public Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken cancellationToken)
         {
-            return Task.FromResult<IReadOnlyList<ToDoItem>>(_tasks.Where(t => t.User.UserId == userId && t.State == ToDoItemState.Active).ToList());
+            return Task.FromResult<IReadOnlyList<ToDoItem>>(_tasks.Where(t => t.UserId == userId && t.State == 0).ToList());
         }
 
         public Task<ToDoItem?> Get(Guid id, CancellationToken cancellationToken)
@@ -46,17 +46,17 @@ namespace Infrastructure.DataAccess
 
         public Task<bool> ExistsByName(Guid userId, string name, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_tasks.Any(t => t.User.UserId == userId && t.Name == name));
+            return Task.FromResult(_tasks.Any(t => t.UserId == userId && t.Name == name));
         }
 
         public Task<int> CountActive(Guid userId, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_tasks.Count(t => t.User.UserId == userId && t.State == ToDoItemState.Active));
+            return Task.FromResult(_tasks.Count(t => t.UserId == userId && t.State == 0));
         }
 
         public Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken cancellationToken)
         {
-            return Task.FromResult<IReadOnlyList<ToDoItem>>(_tasks.Where(t => t.User.UserId == userId && predicate(t)).ToList());
+            return Task.FromResult<IReadOnlyList<ToDoItem>>(_tasks.Where(t => t.UserId == userId && predicate(t)).ToList());
         }
     }
 }

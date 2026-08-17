@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Core.Services;
 using Core.Entities;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot_27_2.Scenarios;
 
-namespace TelegramBot_29.TelegramBot.Scenarios
+namespace TelegramBot_27_2.Scenarios
 {
     public class AddListScenario : IScenario
     {
@@ -26,10 +28,15 @@ namespace TelegramBot_29.TelegramBot.Scenarios
             var chatId = message.Chat.Id;
             var userId = message.From?.Id ?? 0;
 
+            if (!context.Data.TryGetValue("User", out var userObj) || userObj is not ToDoUser user)
+            {
+                await bot.SendMessage(chatId, "Ошибка: пользователь не найден. Начните заново с /addlist.", cancellationToken: ct);
+                return ScenarioResult.Completed;
+            }
+
             switch (context.CurrentStep)
             {
                 case null:
-                    var user = (ToDoUser)context.Data["User"];
                     context.CurrentStep = "Name";
                     await bot.SendMessage(chatId, "Введите название списка (не более 10 символов):", cancellationToken: ct);
                     return ScenarioResult.Transition;
@@ -44,13 +51,12 @@ namespace TelegramBot_29.TelegramBot.Scenarios
 
                     try
                     {
-                        var userObj = (ToDoUser)context.Data["User"];
-                        var newList = await _listService.Add(userObj, listName, ct);
-                        await bot.SendMessage(chatId, $"Список \"{newList.Name}\" создан.", cancellationToken: ct);
+                        var newList = await _listService.Add(user, listName, ct);
+                        await bot.SendMessage(chatId, $"✅ Список \"{newList.Name}\" создан!", cancellationToken: ct);
                     }
                     catch (Exception ex)
                     {
-                        await bot.SendMessage(chatId, $"Ошибка: {ex.Message}", cancellationToken: ct);
+                        await bot.SendMessage(chatId, $"❌ Ошибка: {ex.Message}", cancellationToken: ct);
                     }
                     return ScenarioResult.Completed;
 
