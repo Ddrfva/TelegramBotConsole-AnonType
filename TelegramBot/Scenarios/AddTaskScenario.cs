@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Core.Services;
 using Core.Entities;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot_27_2.Scenarios;
 
 namespace TelegramBot_27_2.Scenarios
 {
@@ -12,11 +15,13 @@ namespace TelegramBot_27_2.Scenarios
     {
         private readonly IUserService _userService;
         private readonly IToDoService _todoService;
+        private readonly IToDoListService _listService;
 
-        public AddTaskScenario(IUserService userService, IToDoService todoService)
+        public AddTaskScenario(IUserService userService, IToDoService todoService, IToDoListService listService)
         {
             _userService = userService;
             _todoService = todoService;
+            _listService = listService;
         }
 
         public bool CanHandle(ScenarioType scenario) => scenario == ScenarioType.AddTask;
@@ -24,54 +29,87 @@ namespace TelegramBot_27_2.Scenarios
         public async Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient bot, ScenarioContext context, Message message, CancellationToken ct)
         {
             var chatId = message.Chat.Id;
-            var userId = message.From?.Id ?? 0;
+
+            if (!context.Data.TryGetValue("User", out var userObj) || userObj is not ToDoUser user)
+            {
+                await bot.SendMessage(chatId, "Сначала зарегистрируйтесь через /start", cancellationToken: ct);
+                return ScenarioResult.Completed;
+            }
 
             switch (context.CurrentStep)
             {
                 case null:
-                    var user = (ToDoUser)context.Data["User"];
                     context.CurrentStep = "Name";
-                    await bot.SendMessage(chatId, "Введите название задачи:", replyMarkup: new ReplyKeyboardMarkup(new[] { new KeyboardButton("/cancel") }) { ResizeKeyboard = true }, cancellationToken: ct);
+                    await bot.SendMessage(chatId, "🌱 Введите название растения:", cancellationToken: ct);
                     return ScenarioResult.Transition;
 
                 case "Name":
-                    var taskName = message.Text?.Trim();
-                    if (string.IsNullOrWhiteSpace(taskName))
+                    var name = message.Text?.Trim();
+                    if (string.IsNullOrWhiteSpace(name) || name.Length > 200)
                     {
-                        await bot.SendMessage(chatId, "Название не может быть пустым. Попробуйте снова:", cancellationToken: ct);
+                        await bot.SendMessage(chatId, "Название должно быть от 1 до 200 символов. Попробуйте снова:", cancellationToken: ct);
                         return ScenarioResult.Transition;
                     }
 
-                    context.Data["TaskName"] = taskName;
-                    context.CurrentStep = "Deadline";
-                    await bot.SendMessage(chatId, "Введите дату выполнения (день.месяц.год, например 31.12.2026):", cancellationToken: ct);
+                    context.Data["PlantName"] = name;
+                    context.CurrentStep = "Species";
+                    await bot.SendMessage(chatId, "🌿 Введите вид растения (или нажмите /skip):", cancellationToken: ct);
                     return ScenarioResult.Transition;
 
-                case "Deadline":
-                    if (!DateTime.TryParseExact(message.Text?.Trim(), "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime deadline))
+                case "Species":
+                    if (message.Text != "/skip")
                     {
-                        await bot.SendMessage(chatId, "Неверный формат. Введите дату в формате день.месяц.год (например, 31.12.2026):", cancellationToken: ct);
-                        return ScenarioResult.Transition;
+                        var species = message.Text?.Trim();
+                        if (!string.IsNullOrWhiteSpace(species))
+                            context.Data["Species"] = species;
                     }
 
-                    var userObj = (ToDoUser)context.Data["User"];
-                    var taskNameObj = (string)context.Data["TaskName"];
+                    context.CurrentStep = "List";
 
-                    try
+                    var lists = await _listService.GetUserLists(user.Id, ct);
+                    if (lists.Any())
                     {
-                        var newTask = await _todoService.Add(userObj, taskNameObj, deadline, ct);
-                        await bot.SendMessage(chatId, $"Задача \"{taskNameObj}\" добавлена. Дедлайн: {deadline:dd.MM.yyyy}. Id: `{newTask.Id}`", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, cancellationToken: ct);
-                    }
-                    catch (Exception ex)
-                    {
-                        await bot.SendMessage(chatId, $"Ошибка: {ex.Message}", cancellationToken: ct);
-                    }
+                        var buttons = lists.Select(list =>
+                            InlineKeyboardButton.WithCallbackData($"📁 {list.Name}", $"list_{list.Id}")
+                        ).ToList();
+                        buttons.Add(InlineKeyboardButton.WithCallbackData("➕ Без списка", "list_null"));
 
+                        var keyboard = new InlineKeyboardMarkup(buttons.Select(b => new[] { b }));
+                        await bot.SendMessage(chatId, "Выберите список для растения (или создайте новый через /addlist):",
+                            replyMarkup: keyboard, cancellationToken: ct);
+                    }
+                    else
+                    {
+                        await bot.SendMessage(chatId, "У вас пока нет списков. Создайте список через /addlist или просто добавьте растение без списка.",
+                            cancellationToken: ct);
+                        context.CurrentStep = "NoList";
+                    }
+                    return ScenarioResult.Transition;
+
+                case "NoList":
+                    await AddPlant(bot, chatId, context, user, null, ct);
                     return ScenarioResult.Completed;
 
                 default:
-                    await bot.SendMessage(chatId, "Неизвестный шаг. Начните заново с /addtask.", cancellationToken: ct);
+                    await bot.SendMessage(chatId, "Неизвестный шаг. Начните заново.", cancellationToken: ct);
                     return ScenarioResult.Completed;
+            }
+        }
+
+        private async Task AddPlant(ITelegramBotClient bot, long chatId, ScenarioContext context, ToDoUser user, Guid? listId, CancellationToken ct)
+        {
+            try
+            {
+                var name = context.Data["PlantName"].ToString();
+                var species = context.Data.ContainsKey("Species") ? context.Data["Species"]?.ToString() : null;
+
+                var item = await _todoService.Add(user, name, listId, ct);
+
+                await bot.SendMessage(chatId, $"✅ Растение \"{name}\" добавлено! 🌱", cancellationToken: ct);
+            }
+            catch (Exception ex)
+            {
+                await bot.SendMessage(chatId, $"❌ Ошибка: {ex.Message}", cancellationToken: ct);
             }
         }
     }

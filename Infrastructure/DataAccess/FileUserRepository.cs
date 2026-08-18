@@ -47,7 +47,7 @@ namespace Infrastructure.DataAccess
 
         public async Task Add(ToDoUser user, CancellationToken cancellationToken)
         {
-            var filePath = GetFilePath(user.UserId);
+            var filePath = GetFilePath(user.Id);
             var json = JsonSerializer.Serialize(user);
             await File.WriteAllTextAsync(filePath, json, cancellationToken);
         }

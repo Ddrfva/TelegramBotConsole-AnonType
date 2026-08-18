@@ -106,7 +106,7 @@ namespace Infrastructure.DataAccess
         public async Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken cancellationToken)
         {
             var all = await GetAllByUserId(userId, cancellationToken);
-            return all.Where(t => t.State == ToDoItemState.Active).ToList();
+            return all.Where(t => t.State == 0).ToList();
         }
 
         public async Task<ToDoItem?> Get(Guid id, CancellationToken cancellationToken)
@@ -135,12 +135,12 @@ namespace Infrastructure.DataAccess
 
         public async Task Add(ToDoItem item, CancellationToken cancellationToken)
         {
-            var userDir = GetUserDirectory(item.User.UserId);
+            var userDir = GetUserDirectory(item.UserId);
             var filePath = Path.Combine(userDir, $"{item.Id}.json");
             var json = JsonSerializer.Serialize(item);
             await File.WriteAllTextAsync(filePath, json, cancellationToken);
 
-            _index[item.Id] = item.User.UserId;
+            _index[item.Id] = item.UserId;
             SaveIndex();
         }
 

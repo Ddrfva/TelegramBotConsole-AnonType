@@ -1,30 +1,11 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using Core.Entities;
 
-namespace Core.Entities
+public class ToDoList
 {
-    public class ToDoList
-    {
-        public Guid Id { get; }
-        public string Name { get; }
-        public ToDoUser User { get; }
-        public DateTime CreatedAt { get; }
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    public Guid UserId { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-        public ToDoList(ToDoUser user, string name)
-        {
-            Id = Guid.NewGuid();
-            User = user;
-            Name = name;
-            CreatedAt = DateTime.UtcNow;
-        }
-
-        [JsonConstructor]
-        public ToDoList(Guid id, string name, ToDoUser user, DateTime createdAt)
-        {
-            Id = id;
-            Name = name;
-            User = user;
-            CreatedAt = createdAt;
-        }
-    }
+    public ToDoUser User { get; set; }
 }
