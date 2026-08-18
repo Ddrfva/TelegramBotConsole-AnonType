@@ -3,11 +3,11 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Core.Services;
 using Core.Entities;
-using TelegramBot_27_2.Scenarios;
+using TelegramBot_31.Scenarios;
 using System.Linq;
 using Telegram.Bot.Types.Enums;
 
-namespace TelegramBot_30.Classes
+namespace TelegramBot_31.Classes
 {
     public class UpdateHandler
     {
