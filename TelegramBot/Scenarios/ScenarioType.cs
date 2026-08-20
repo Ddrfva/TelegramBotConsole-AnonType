@@ -1,4 +1,4 @@
-﻿namespace TelegramBot_27_2.Scenarios
+﻿namespace TelegramBot_31.Scenarios
 {
     public enum ScenarioType
     {

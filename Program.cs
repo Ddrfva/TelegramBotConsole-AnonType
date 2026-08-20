@@ -1,16 +1,16 @@
 ﻿using Core.DataAccess;
 using Core.Services;
-using Core.Entities;
 using dotenv.net;
 using Infrastructure.DataAccess;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using TelegramBot_27_2.Scenarios;
-using TelegramBot_30.Classes;
+using TelegramBot_31.Scenarios;
+using TelegramBot_31.Classes;
+using TelegramBot_31.BackgroundTasks;
 
-namespace TelegramBot_30
+namespace TelegramBot_31
 {
     class Program
     {
@@ -21,12 +21,12 @@ namespace TelegramBot_30
             var token = Environment.GetEnvironmentVariable("BOT_TOKEN");
             if (string.IsNullOrEmpty(token))
             {
-                Console.WriteLine("Ошибка: Токен бота не найден.");
+                Console.WriteLine("❌ Ошибка: Токен бота не найден.");
                 return;
             }
 
             var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
-                ?? "Host=localhost;Port=5432;Database=FlowerCare;Username=postgres;Password=0311;";
+            ?? throw new InvalidOperationException("DATABASE_CONNECTION_STRING not found in .env");
 
             var factory = new DataContextFactory(connectionString);
 
@@ -49,6 +49,19 @@ namespace TelegramBot_30
                 new DeleteTaskScenario(todoService)
             };
 
+            var botClient = new TelegramBotClient(token);
+            var cts = new CancellationTokenSource();
+
+            var backgroundTaskRunner = new BackgroundTaskRunner();
+
+            var resetTask = new ResetScenarioBackgroundTask(
+            TimeSpan.FromHours(1),
+            contextRepository,
+            botClient
+            );
+            backgroundTaskRunner.AddTask(resetTask);
+            backgroundTaskRunner.StartTasks(cts.Token);
+
             var handler = new UpdateHandler(
                 userService,
                 todoService,
@@ -56,9 +69,6 @@ namespace TelegramBot_30
                 listService,
                 contextRepository,
                 scenarios);
-
-            var botClient = new TelegramBotClient(token);
-            var cts = new CancellationTokenSource();
 
             var receiverOptions = new ReceiverOptions
             {
@@ -86,18 +96,27 @@ namespace TelegramBot_30
             );
 
             var me = await botClient.GetMe(cancellationToken: cts.Token);
-            Console.WriteLine($"Бот @{me.Username} запущен!");
+            Console.WriteLine($"✅ Бот @{me.Username} запущен!");
             Console.WriteLine("Нажмите клавишу A для выхода");
 
-            while (true)
+            try
             {
-                var key = Console.ReadKey(true).Key;
-                if (key == ConsoleKey.A)
+                while (true)
                 {
-                    Console.WriteLine("Завершение работы...");
-                    await cts.CancelAsync();
-                    break;
+                    var key = Console.ReadKey(true).Key;
+                    if (key == ConsoleKey.A)
+                    {
+                        Console.WriteLine("⏹️ Завершение работы...");
+                        await cts.CancelAsync();
+                        break;
+                    }
                 }
+            }
+            finally
+            {
+                await backgroundTaskRunner.StopTasks(CancellationToken.None);
+                botClient.Close();
+                Console.WriteLine("Бот остановлен.");
             }
         }
     }

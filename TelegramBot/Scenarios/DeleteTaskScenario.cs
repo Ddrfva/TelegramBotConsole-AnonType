@@ -7,9 +7,9 @@ using Core.Entities;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBot_27_2.Scenarios;
+using TelegramBot_31.Scenarios;
 
-namespace TelegramBot_27_2.Scenarios
+namespace TelegramBot_31.Scenarios
 {
     public class DeleteTaskScenario : IScenario
     {
