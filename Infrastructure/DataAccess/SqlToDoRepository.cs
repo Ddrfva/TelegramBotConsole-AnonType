@@ -28,7 +28,7 @@ namespace Infrastructure.DataAccess
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
                 .Where(i => i.UserId == userId)
-                .ToListAsync(cancellationToken);
+                .ToListAsync();
 
             return models.Select(ModelMapper.MapFromModel).ToList();
         }
@@ -42,7 +42,7 @@ namespace Infrastructure.DataAccess
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
                 .Where(i => i.UserId == userId && i.State == 0)
-                .ToListAsync(cancellationToken);
+                .ToListAsync();
 
             return models.Select(ModelMapper.MapFromModel).ToList();
         }
@@ -55,7 +55,7 @@ namespace Infrastructure.DataAccess
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
-                .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+                .FirstOrDefaultAsync(i => i.Id == id);
 
             return ModelMapper.MapFromModel(model);
         }
@@ -82,7 +82,7 @@ namespace Infrastructure.DataAccess
 
             await dbContext.Items
                 .Where(i => i.Id == id)
-                .DeleteAsync(cancellationToken);
+                .DeleteAsync();
         }
 
         public async Task<bool> ExistsByName(Guid userId, string name, CancellationToken cancellationToken)
@@ -90,7 +90,7 @@ namespace Infrastructure.DataAccess
             using var dbContext = _factory.CreateDataContext();
 
             return await dbContext.Items
-                .AnyAsync(i => i.UserId == userId && i.Name == name, cancellationToken);
+                .AnyAsync(i => i.UserId == userId && i.Name == name);
         }
 
         public async Task<int> CountActive(Guid userId, CancellationToken cancellationToken)
@@ -99,7 +99,7 @@ namespace Infrastructure.DataAccess
 
             return await dbContext.Items
                 .Where(i => i.UserId == userId && i.State == 0)
-                .CountAsync(cancellationToken);
+                .CountAsync();
         }
 
         public async Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken cancellationToken)
@@ -111,10 +111,31 @@ namespace Infrastructure.DataAccess
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
                 .Where(i => i.UserId == userId)
-                .ToListAsync(cancellationToken);
+                .ToListAsync();
 
             var entities = models.Select(ModelMapper.MapFromModel).ToList();
             return entities.Where(predicate).ToList();
+        }
+
+        public async Task<IReadOnlyList<ToDoItem>> GetActiveWithDeadline(
+            Guid userId,
+            DateTime from,
+            DateTime to,
+            CancellationToken ct)
+        {
+            using var dbContext = _factory.CreateDataContext();
+
+            var models = await dbContext.Items
+                .LoadWith(i => i.User)
+                .LoadWith(i => i.List)
+                .Where(i => i.UserId == userId
+                    && i.State == 0
+                    && i.Deadline != null
+                    && i.Deadline >= from
+                    && i.Deadline < to)
+                .ToListAsync();
+
+            return models.Select(ModelMapper.MapFromModel).ToList();
         }
     }
 }
