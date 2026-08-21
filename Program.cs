@@ -2,7 +2,7 @@
 using Core.Services;
 using dotenv.net;
 using Infrastructure.DataAccess;
-using Infrastructure.Services;  // ← для NotificationService
+using Infrastructure.Services;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -26,9 +26,6 @@ namespace TelegramBot_31
                 return;
             }
 
-            // ==========================================
-            // 1. ПОДКЛЮЧЕНИЕ К БД И РЕПОЗИТОРИИ
-            // ==========================================
             var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
                 ?? throw new InvalidOperationException("DATABASE_CONNECTION_STRING not found in .env");
 
@@ -38,23 +35,14 @@ namespace TelegramBot_31
             var todoRepository = new SqlToDoRepository(factory);
             var listRepository = new SqlToDoListRepository(factory);
 
-            // ==========================================
-            // 2. СЕРВИСЫ
-            // ==========================================
             var userService = new UserService(userRepository);
             var todoService = new ToDoService(todoRepository, userRepository, maxTasks: 100, maxTaskLength: 500);
             var reportService = new ToDoReportService(todoRepository);
             var listService = new ToDoListService(listRepository);
-            var notificationService = new NotificationService(factory);  // ← НОВЫЙ СЕРВИС
+            var notificationService = new NotificationService(factory);
 
-            // ==========================================
-            // 3. РЕПОЗИТОРИЙ СЦЕНАРИЕВ
-            // ==========================================
             var contextRepository = new InMemoryScenarioContextRepository();
 
-            // ==========================================
-            // 4. СЦЕНАРИИ
-            // ==========================================
             var scenarios = new List<IScenario>
             {
                 new AddTaskScenario(userService, todoService, listService),
@@ -63,15 +51,9 @@ namespace TelegramBot_31
                 new DeleteTaskScenario(todoService)
             };
 
-            // ==========================================
-            // 5. БОТ
-            // ==========================================
             var botClient = new TelegramBotClient(token);
             var cts = new CancellationTokenSource();
 
-            // ==========================================
-            // 6. ХЕНДЛЕР
-            // ==========================================
             var handler = new UpdateHandler(
                 userService,
                 todoService,
@@ -80,12 +62,8 @@ namespace TelegramBot_31
                 contextRepository,
                 scenarios);
 
-            // ==========================================
-            // 7. ФОНОВЫЕ ЗАДАЧИ
-            // ==========================================
             var backgroundTaskRunner = new BackgroundTaskRunner();
 
-            // 7.1 Сброс сценариев (1 час)
             var resetTask = new ResetScenarioBackgroundTask(
                 TimeSpan.FromHours(1),
                 contextRepository,
@@ -93,14 +71,12 @@ namespace TelegramBot_31
             );
             backgroundTaskRunner.AddTask(resetTask);
 
-            // 7.2 Отправка нотификаций (каждую минуту)
             var notificationTask = new NotificationBackgroundTask(
                 notificationService,
                 botClient
             );
             backgroundTaskRunner.AddTask(notificationTask);
 
-            // 7.3 Дедлайны (каждый час)
             var deadlineTask = new DeadlineBackgroundTask(
                 notificationService,
                 userRepository,
@@ -108,7 +84,6 @@ namespace TelegramBot_31
             );
             backgroundTaskRunner.AddTask(deadlineTask);
 
-            // 7.4 Задачи на сегодня (раз в день)
             var todayTask = new TodayBackgroundTask(
                 notificationService,
                 userRepository,
@@ -118,9 +93,6 @@ namespace TelegramBot_31
 
             backgroundTaskRunner.StartTasks(cts.Token);
 
-            // ==========================================
-            // 8. ЗАПУСК БОТА
-            // ==========================================
             var receiverOptions = new ReceiverOptions
             {
                 AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery],
@@ -150,9 +122,6 @@ namespace TelegramBot_31
             Console.WriteLine($"✅ Бот @{me.Username} запущен!");
             Console.WriteLine("Нажмите клавишу A для выхода");
 
-            // ==========================================
-            // 9. ОЖИДАНИЕ ЗАВЕРШЕНИЯ
-            // ==========================================
             try
             {
                 while (true)

@@ -12,7 +12,7 @@ namespace Infrastructure.DataAccess.Models
         [Column("UserId")]
         public Guid UserId { get; set; }
 
-        [Column("TelegramUserId")]  // ← ДОБАВЛЕНО
+        [Column("TelegramUserId")]
         public long TelegramUserId { get; set; }
 
         [Column("Type")]

@@ -10,7 +10,7 @@ namespace Core.Services
     {
         Task<bool> ScheduleNotification(
             Guid userId,
-            long telegramUserId,  // ← ДОБАВЛЕНО
+            long telegramUserId,
             string type,
             string text,
             DateTime scheduledAt,

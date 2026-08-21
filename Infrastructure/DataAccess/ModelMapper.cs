@@ -7,9 +7,7 @@ namespace Infrastructure.DataAccess
 {
     internal static class ModelMapper
     {
-        // =============================================
-        // User mappings
-        // =============================================
+
         public static ToDoUser MapFromModel(ToDoUserModel model)
         {
             if (model == null) return null;
@@ -36,9 +34,6 @@ namespace Infrastructure.DataAccess
             };
         }
 
-        // =============================================
-        // List mappings
-        // =============================================
         public static ToDoList MapFromModel(ToDoListModel model)
         {
             if (model == null) return null;
@@ -67,9 +62,6 @@ namespace Infrastructure.DataAccess
             };
         }
 
-        // =============================================
-        // Item mappings
-        // =============================================
         public static ToDoItem MapFromModel(ToDoItemModel model)
         {
             if (model == null) return null;
@@ -118,9 +110,6 @@ namespace Infrastructure.DataAccess
             };
         }
 
-        // =============================================
-        // Notification mappings
-        // =============================================
         public static Notification MapFromModel(NotificationModel model)
         {
             if (model == null) return null;
@@ -129,7 +118,7 @@ namespace Infrastructure.DataAccess
             {
                 Id = model.Id,
                 UserId = model.UserId,
-                TelegramUserId = model.TelegramUserId,  // ← ДОБАВЛЕНО
+                TelegramUserId = model.TelegramUserId,
                 Type = model.Type,
                 Text = model.Text,
                 ScheduledAt = model.ScheduledAt,
@@ -146,7 +135,7 @@ namespace Infrastructure.DataAccess
             {
                 Id = entity.Id,
                 UserId = entity.UserId,
-                TelegramUserId = entity.TelegramUserId,  // ← ДОБАВЛЕНО
+                TelegramUserId = entity.TelegramUserId,
                 Type = entity.Type,
                 Text = entity.Text,
                 ScheduledAt = entity.ScheduledAt,

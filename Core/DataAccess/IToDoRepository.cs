@@ -13,8 +13,6 @@ namespace Core.DataAccess
         Task<bool> ExistsByName(Guid userId, string name, CancellationToken cancellationToken);
         Task<int> CountActive(Guid userId, CancellationToken cancellationToken);
         Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken cancellationToken);
-
-        // НОВЫЙ МЕТОД (без public!)
         Task<IReadOnlyList<ToDoItem>> GetActiveWithDeadline(
             Guid userId,
             DateTime from,

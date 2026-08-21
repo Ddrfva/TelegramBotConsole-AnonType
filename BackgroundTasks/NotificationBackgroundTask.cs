@@ -24,7 +24,6 @@ namespace TelegramBot_31.BackgroundTasks
         {
             try
             {
-                // Получаем нотификации, которые нужно отправить
                 var notifications = await _notificationService.GetScheduledNotifications(DateTime.UtcNow, ct);
 
                 Console.WriteLine($"📨 Найдено нотификаций для отправки: {notifications.Count}");
@@ -37,7 +36,6 @@ namespace TelegramBot_31.BackgroundTasks
                         Console.WriteLine($"   Пользователь (TelegramUserId): {notification.TelegramUserId}");
                         Console.WriteLine($"   Текст: {notification.Text}");
 
-                        // Отправляем сообщение пользователю
                         await _bot.SendMessage(
                             chatId: notification.TelegramUserId,
                             text: notification.Text,
@@ -45,7 +43,6 @@ namespace TelegramBot_31.BackgroundTasks
 
                         Console.WriteLine($"✅ Сообщение отправлено в Telegram");
 
-                        // Помечаем как отправленное
                         await _notificationService.MarkNotified(notification.Id, ct);
 
                         Console.WriteLine($"✅ Нотификация {notification.Id} помечена как отправленная");

@@ -27,17 +27,14 @@ namespace TelegramBot_31.BackgroundTasks
 
         protected override async Task Execute(CancellationToken ct)
         {
-            // Получаем всех пользователей
             var users = await _userRepository.GetUsers(ct);
 
-            // Сегодняшняя дата
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
             foreach (var user in users)
             {
                 try
                 {
-                    // Получаем задачи на сегодня
                     var allTasks = await _toDoRepository.GetAllByUserId(user.Id, ct);
                     var todayTasks = allTasks
                         .Where(t => t.Deadline.HasValue
@@ -48,7 +45,6 @@ namespace TelegramBot_31.BackgroundTasks
                     if (!todayTasks.Any())
                         continue;
 
-                    // Формируем текст
                     var text = new StringBuilder();
                     text.AppendLine($"📋 Задачи на сегодня ({today}):");
 
@@ -57,12 +53,11 @@ namespace TelegramBot_31.BackgroundTasks
                         text.AppendLine($"  - {task.Name}");
                     }
 
-                    // Создаём нотификацию (только одну на пользователя в день)
                     var type = $"Today_{today}";
 
                     await _notificationService.ScheduleNotification(
                         user.Id,
-                        user.TelegramUserId,  // ← ДОБАВЛЕНО!
+                        user.TelegramUserId,
                         type,
                         text.ToString(),
                         DateTime.UtcNow,
