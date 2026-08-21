@@ -6,41 +6,44 @@ namespace Core.DataAccess.Models
     [Table("flowers")]
     public class ToDoItemModel
     {
-        [Column("id"), PrimaryKey]
+        [Column("id"), PrimaryKey]  // ← нижний регистр!
         public Guid Id { get; set; }
 
-        [Column("name")]
+        [Column("name")]  // ← нижний регистр!
         public string Name { get; set; }
 
-        [Column("species")]
+        [Column("species")]  // ← нижний регистр!
         public string Species { get; set; }
 
-        [Column("userid")]
+        [Column("userid")]  // ← ИСПРАВЛЕНО!
         public Guid UserId { get; set; }
 
-        [Column("collectionid")]
+        [Column("collectionid")]  // ← ИСПРАВЛЕНО!
         public Guid? ListId { get; set; }
 
-        [Column("wateringfrequencydays")]
+        [Column("wateringfrequencydays")]  // ← нижний регистр!
         public int? WateringFrequencyDays { get; set; }
 
-        [Column("lastwateredat")]
+        [Column("lastwateredat")]  // ← нижний регистр!
         public DateTime? LastWateredAt { get; set; }
 
-        [Column("lightrequirement")]
+        [Column("lightrequirement")]  // ← нижний регистр!
         public string LightRequirement { get; set; }
 
-        [Column("notes")]
+        [Column("notes")]  // ← нижний регистр!
         public string Notes { get; set; }
 
-        [Column("state")]
+        [Column("state")]  // ← нижний регистр!
         public int State { get; set; }
 
-        [Column("createdatutc")]
+        [Column("createdatutc")]  // ← нижний регистр!
         public DateTime CreatedAtUtc { get; set; }
 
-        [Column("statechangedatutc")]
+        [Column("statechangedatutc")]  // ← нижний регистр!
         public DateTime? StateChangedAtUtc { get; set; }
+
+        [Column("deadline")]  // ← нижний регистр!
+        public DateTime? Deadline { get; set; }
 
         [Association(ThisKey = nameof(UserId), OtherKey = nameof(ToDoUserModel.Id))]
         public ToDoUserModel User { get; set; }

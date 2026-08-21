@@ -23,6 +23,9 @@ namespace Core.Entities
         public DateTime CreatedAtUtc { get; set; }
         public DateTime? StateChangedAtUtc { get; set; }
 
+        // мнбне ябниярбн
+        public DateTime? Deadline { get; set; }
+
         public ToDoUser User { get; set; }
         public ToDoList List { get; set; }
     }

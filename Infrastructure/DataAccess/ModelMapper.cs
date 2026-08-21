@@ -1,11 +1,15 @@
 ﻿using System;
 using Core.Entities;
 using Core.DataAccess.Models;
+using Infrastructure.DataAccess.Models;
 
 namespace Infrastructure.DataAccess
 {
     internal static class ModelMapper
     {
+        // =============================================
+        // User mappings
+        // =============================================
         public static ToDoUser MapFromModel(ToDoUserModel model)
         {
             if (model == null) return null;
@@ -32,6 +36,9 @@ namespace Infrastructure.DataAccess
             };
         }
 
+        // =============================================
+        // List mappings
+        // =============================================
         public static ToDoList MapFromModel(ToDoListModel model)
         {
             if (model == null) return null;
@@ -60,6 +67,9 @@ namespace Infrastructure.DataAccess
             };
         }
 
+        // =============================================
+        // Item mappings
+        // =============================================
         public static ToDoItem MapFromModel(ToDoItemModel model)
         {
             if (model == null) return null;
@@ -78,6 +88,7 @@ namespace Infrastructure.DataAccess
                 State = (ToDoItemState)model.State,
                 CreatedAtUtc = model.CreatedAtUtc,
                 StateChangedAtUtc = model.StateChangedAtUtc,
+                Deadline = model.Deadline,
                 User = model.User != null ? MapFromModel(model.User) : null,
                 List = model.List != null ? MapFromModel(model.List) : null
             };
@@ -101,8 +112,46 @@ namespace Infrastructure.DataAccess
                 State = (int)entity.State,
                 CreatedAtUtc = entity.CreatedAtUtc,
                 StateChangedAtUtc = entity.StateChangedAtUtc,
+                Deadline = entity.Deadline,
                 User = entity.User != null ? MapToModel(entity.User) : null,
                 List = entity.List != null ? MapToModel(entity.List) : null
+            };
+        }
+
+        // =============================================
+        // Notification mappings
+        // =============================================
+        public static Notification MapFromModel(NotificationModel model)
+        {
+            if (model == null) return null;
+
+            return new Notification
+            {
+                Id = model.Id,
+                UserId = model.UserId,
+                TelegramUserId = model.TelegramUserId,  // ← ДОБАВЛЕНО
+                Type = model.Type,
+                Text = model.Text,
+                ScheduledAt = model.ScheduledAt,
+                IsNotified = model.IsNotified,
+                NotifiedAt = model.NotifiedAt
+            };
+        }
+
+        public static NotificationModel MapToModel(Notification entity)
+        {
+            if (entity == null) return null;
+
+            return new NotificationModel
+            {
+                Id = entity.Id,
+                UserId = entity.UserId,
+                TelegramUserId = entity.TelegramUserId,  // ← ДОБАВЛЕНО
+                Type = entity.Type,
+                Text = entity.Text,
+                ScheduledAt = entity.ScheduledAt,
+                IsNotified = entity.IsNotified,
+                NotifiedAt = entity.NotifiedAt
             };
         }
     }
