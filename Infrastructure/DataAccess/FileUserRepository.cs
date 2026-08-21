@@ -51,5 +51,28 @@ namespace Infrastructure.DataAccess
             var json = JsonSerializer.Serialize(user);
             await File.WriteAllTextAsync(filePath, json, cancellationToken);
         }
+
+        public async Task<IReadOnlyList<ToDoUser>> GetUsers(CancellationToken ct)
+        {
+            var users = new List<ToDoUser>();
+            if (!Directory.Exists(_basePath))
+                return users;
+
+            foreach (var file in Directory.GetFiles(_basePath, "*.json"))
+            {
+                try
+                {
+                    var json = await File.ReadAllTextAsync(file, ct);
+                    var user = JsonSerializer.Deserialize<ToDoUser>(json);
+                    if (user != null)
+                        users.Add(user);
+                }
+                catch
+                {
+                    // Пропускаем повреждённые файлы
+                }
+            }
+            return users;
+        }
     }
 }

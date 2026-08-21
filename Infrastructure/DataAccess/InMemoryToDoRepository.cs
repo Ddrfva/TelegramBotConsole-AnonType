@@ -58,5 +58,20 @@ namespace Infrastructure.DataAccess
         {
             return Task.FromResult<IReadOnlyList<ToDoItem>>(_tasks.Where(t => t.UserId == userId && predicate(t)).ToList());
         }
+
+        public Task<IReadOnlyList<ToDoItem>> GetActiveWithDeadline(
+            Guid userId,
+            DateTime from,
+            DateTime to,
+            CancellationToken ct)
+        {
+            return Task.FromResult<IReadOnlyList<ToDoItem>>(
+                _tasks.Where(t => t.UserId == userId
+                    && t.State == 0
+                    && t.Deadline >= from
+                    && t.Deadline < to)
+                .ToList()
+            );
+        }
     }
 }
