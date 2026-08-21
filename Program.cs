@@ -1,15 +1,17 @@
-﻿using dotenv.net;
+﻿using Core.DataAccess;
+using Core.Services;
+using dotenv.net;
+using Infrastructure.DataAccess;
+using Infrastructure.Services;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Core.Services;
-using Core.DataAccess;
-using Infrastructure.DataAccess;
-using TelegramBot_29.TelegramBot;
-using TelegramBot_29.TelegramBot.Scenarios;
+using TelegramBot_31.Scenarios;
+using TelegramBot_31.Classes;
+using TelegramBot_31.BackgroundTasks;
 
-namespace TelegramBot_29
+namespace TelegramBot_31
 {
     class Program
     {
@@ -20,21 +22,24 @@ namespace TelegramBot_29
             var token = Environment.GetEnvironmentVariable("BOT_TOKEN");
             if (string.IsNullOrEmpty(token))
             {
-                Console.WriteLine("Ошибка: Токен бота не найден.");
+                Console.WriteLine("❌ Ошибка: Токен бота не найден.");
                 return;
             }
 
-            var basePath = AppDomain.CurrentDomain.BaseDirectory;
-            var dataPath = Path.Combine(basePath, "Data");
+            var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
+                ?? throw new InvalidOperationException("DATABASE_CONNECTION_STRING not found in .env");
 
-            var userRepository = new FileUserRepository(Path.Combine(dataPath, "Users"));
-            var todoRepository = new FileToDoRepository(Path.Combine(dataPath, "Tasks"));
-            var listRepository = new InMemoryToDoListRepository();
+            var factory = new DataContextFactory(connectionString);
+
+            var userRepository = new SqlUserRepository(factory);
+            var todoRepository = new SqlToDoRepository(factory);
+            var listRepository = new SqlToDoListRepository(factory);
 
             var userService = new UserService(userRepository);
             var todoService = new ToDoService(todoRepository, userRepository, maxTasks: 100, maxTaskLength: 500);
             var reportService = new ToDoReportService(todoRepository);
             var listService = new ToDoListService(listRepository);
+            var notificationService = new NotificationService(factory);
 
             var contextRepository = new InMemoryScenarioContextRepository();
 
@@ -46,10 +51,47 @@ namespace TelegramBot_29
                 new DeleteTaskScenario(todoService)
             };
 
-            var handler = new UpdateHandler(userService, todoService, reportService, listService, contextRepository, scenarios);
-
             var botClient = new TelegramBotClient(token);
             var cts = new CancellationTokenSource();
+
+            var handler = new UpdateHandler(
+                userService,
+                todoService,
+                reportService,
+                listService,
+                contextRepository,
+                scenarios);
+
+            var backgroundTaskRunner = new BackgroundTaskRunner();
+
+            var resetTask = new ResetScenarioBackgroundTask(
+                TimeSpan.FromHours(1),
+                contextRepository,
+                botClient
+            );
+            backgroundTaskRunner.AddTask(resetTask);
+
+            var notificationTask = new NotificationBackgroundTask(
+                notificationService,
+                botClient
+            );
+            backgroundTaskRunner.AddTask(notificationTask);
+
+            var deadlineTask = new DeadlineBackgroundTask(
+                notificationService,
+                userRepository,
+                todoRepository
+            );
+            backgroundTaskRunner.AddTask(deadlineTask);
+
+            var todayTask = new TodayBackgroundTask(
+                notificationService,
+                userRepository,
+                todoRepository
+            );
+            backgroundTaskRunner.AddTask(todayTask);
+
+            backgroundTaskRunner.StartTasks(cts.Token);
 
             var receiverOptions = new ReceiverOptions
             {
@@ -69,6 +111,7 @@ namespace TelegramBot_29
                 {
                     new BotCommand { Command = "start", Description = "Начать работу" },
                     new BotCommand { Command = "addtask", Description = "Добавить задачу" },
+                    new BotCommand { Command = "addlist", Description = "Создать список" },
                     new BotCommand { Command = "show", Description = "Показать задачи по спискам" },
                     new BotCommand { Command = "report", Description = "Статистика" },
                 },
@@ -76,18 +119,26 @@ namespace TelegramBot_29
             );
 
             var me = await botClient.GetMe(cancellationToken: cts.Token);
-            Console.WriteLine($"Бот @{me.Username} запущен!");
+            Console.WriteLine($"✅ Бот @{me.Username} запущен!");
             Console.WriteLine("Нажмите клавишу A для выхода");
 
-            while (true)
+            try
             {
-                var key = Console.ReadKey(true).Key;
-                if (key == ConsoleKey.A)
+                while (true)
                 {
-                    Console.WriteLine("Завершение работы...");
-                    await cts.CancelAsync();
-                    break;
+                    var key = Console.ReadKey(true).Key;
+                    if (key == ConsoleKey.A)
+                    {
+                        Console.WriteLine("⏹️ Завершение работы...");
+                        await cts.CancelAsync();
+                        break;
+                    }
                 }
+            }
+            finally
+            {
+                await backgroundTaskRunner.StopTasks(CancellationToken.None);
+                Console.WriteLine("Бот остановлен.");
             }
         }
     }

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace TelegramBot_29.TelegramBot.Scenarios
+namespace TelegramBot_31.Scenarios
 {
     public enum ScenarioResult
     {

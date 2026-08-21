@@ -43,7 +43,7 @@ namespace Infrastructure.DataAccess
                 {
                     var json = await File.ReadAllTextAsync(file, ct);
                     var list = JsonSerializer.Deserialize<ToDoList>(json);
-                    if (list != null && list.User != null && list.User.UserId == userId)
+                    if (list != null && list.UserId == userId)
                         result.Add(list);
                 }
                 catch

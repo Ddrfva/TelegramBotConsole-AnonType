@@ -1,8 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TelegramBot_29.TelegramBot.Scenarios
+namespace TelegramBot_31.Scenarios
 {
     public class InMemoryScenarioContextRepository : IScenarioContextRepository
     {
@@ -24,6 +26,16 @@ namespace TelegramBot_29.TelegramBot.Scenarios
         {
             _storage.TryRemove(userId, out _);
             return Task.CompletedTask;
+        }
+
+        public Task<IReadOnlyList<(long UserId, ScenarioContext Context)>> GetContexts(CancellationToken ct)
+        {
+            var contexts = _storage
+                .Select(kvp => (kvp.Key, kvp.Value))
+                .ToList()
+                .AsReadOnly();
+
+            return Task.FromResult<IReadOnlyList<(long UserId, ScenarioContext Context)>>(contexts);
         }
     }
 }

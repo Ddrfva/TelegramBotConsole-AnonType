@@ -21,10 +21,17 @@ namespace Core.Services
             if (name.Length > 10)
                 throw new ArgumentException("Название списка не может быть длиннее 10 символов");
 
-            if (await _listRepository.ExistsByName(user.UserId, name, ct))
+            if (await _listRepository.ExistsByName(user.Id, name, ct))
                 throw new DuplicateTaskException($"Список с именем '{name}' уже существует");
 
-            var list = new ToDoList(user, name);
+            var list = new ToDoList
+            {
+                Id = Guid.NewGuid(),
+                Name = name,
+                UserId = user.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+
             await _listRepository.Add(list, ct);
             return list;
         }

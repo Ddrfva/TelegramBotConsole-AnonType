@@ -9,7 +9,7 @@ namespace Infrastructure.DataAccess
 
         public Task<ToDoUser?> GetUser(Guid userId, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_users.FirstOrDefault(u => u.UserId == userId));
+            return Task.FromResult(_users.FirstOrDefault(u => u.Id == userId));
         }
 
         public Task<ToDoUser?> GetUserByTelegramUserId(long telegramUserId, CancellationToken cancellationToken)
@@ -21,6 +21,11 @@ namespace Infrastructure.DataAccess
         {
             _users.Add(user);
             return Task.CompletedTask;
+        }
+
+        public Task<IReadOnlyList<ToDoUser>> GetUsers(CancellationToken ct)
+        {
+            return Task.FromResult<IReadOnlyList<ToDoUser>>(_users.ToList());
         }
     }
 }

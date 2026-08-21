@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Core.Services;
 using Core.Entities;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot_31.Scenarios;
 
-namespace TelegramBot_29.TelegramBot.Scenarios
+namespace TelegramBot_31.Scenarios
 {
     public class DeleteListScenario : IScenario
     {
@@ -29,17 +31,16 @@ namespace TelegramBot_29.TelegramBot.Scenarios
             var chatId = message.Chat.Id;
             var userId = message.From?.Id ?? 0;
 
+            if (!context.Data.TryGetValue("User", out var userObj) || userObj is not ToDoUser user)
+            {
+                await bot.SendMessage(chatId, "Сначала зарегистрируйтесь через /start", cancellationToken: ct);
+                return ScenarioResult.Completed;
+            }
+
             switch (context.CurrentStep)
             {
                 case null:
-                    var user = (ToDoUser)context.Data["User"];
-                    if (user == null)
-                    {
-                        await bot.SendMessage(chatId, "Сначала зарегистрируйтесь через /start", cancellationToken: ct);
-                        return ScenarioResult.Completed;
-                    }
-
-                    var lists = await _listService.GetUserLists(user.UserId, ct);
+                    var lists = await _listService.GetUserLists(user.Id, ct);
                     if (!lists.Any())
                     {
                         await bot.SendMessage(chatId, "У вас нет списков для удаления.", cancellationToken: ct);
@@ -48,7 +49,7 @@ namespace TelegramBot_29.TelegramBot.Scenarios
 
                     var buttons = lists.Select(list =>
                     {
-                        var callbackData = $"delete_{list.Id}";
+                        var callbackData = $"deletelist_{list.Id}";
                         return InlineKeyboardButton.WithCallbackData($"❌ {list.Name}", callbackData);
                     }).ToList();
 
@@ -56,9 +57,11 @@ namespace TelegramBot_29.TelegramBot.Scenarios
 
                     await bot.SendMessage(chatId, "Выберите список для удаления:", replyMarkup: keyboard, cancellationToken: ct);
                     context.CurrentStep = "Approve";
+                    context.Data["Lists"] = lists;
                     return ScenarioResult.Transition;
 
                 case "Approve":
+
                     return ScenarioResult.Completed;
 
                 default:

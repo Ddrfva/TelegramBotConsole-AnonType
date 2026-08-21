@@ -1,12 +1,14 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace TelegramBot_29.TelegramBot.Scenarios
+namespace TelegramBot_31.Scenarios
 {
     public interface IScenarioContextRepository
     {
         Task<ScenarioContext?> GetContext(long userId, CancellationToken ct);
         Task SetContext(long userId, ScenarioContext context, CancellationToken ct);
         Task ResetContext(long userId, CancellationToken ct);
+        Task<IReadOnlyList<(long UserId, ScenarioContext Context)>> GetContexts(CancellationToken ct);
     }
 }
