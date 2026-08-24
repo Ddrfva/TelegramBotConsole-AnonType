@@ -1,5 +1,6 @@
 ﻿using System;
 using LinqToDB.Mapping;
+using Core.DataAccess.Models;
 
 namespace Infrastructure.DataAccess.Models
 {
@@ -29,5 +30,8 @@ namespace Infrastructure.DataAccess.Models
 
         [Column("NotifiedAt")]
         public DateTime? NotifiedAt { get; set; }
+
+        [Association(ThisKey = nameof(UserId), OtherKey = nameof(ToDoUserModel.Id))]
+        public ToDoUserModel User { get; set; }
     }
 }
