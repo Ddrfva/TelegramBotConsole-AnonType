@@ -5,6 +5,7 @@ namespace Core.Entities
     public class Notification
     {
         public Guid Id { get; set; }
+        public ToDoUser User { get; set; }
         public Guid UserId { get; set; }
         public long TelegramUserId { get; set; }
         public string Type { get; set; }
