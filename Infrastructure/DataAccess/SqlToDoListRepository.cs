@@ -25,7 +25,7 @@ namespace Infrastructure.DataAccess
 
             var model = await dbContext.Lists
                 .LoadWith(l => l.User)
-                .FirstOrDefaultAsync(l => l.Id == id, ct);
+                .FirstOrDefaultAsync(l => l.Id == id);
 
             return ModelMapper.MapFromModel(model);
         }
@@ -37,7 +37,7 @@ namespace Infrastructure.DataAccess
             var models = await dbContext.Lists
                 .LoadWith(l => l.User)
                 .Where(l => l.UserId == userId)
-                .ToListAsync(ct);
+                .ToListAsync();
 
             return models.Select(ModelMapper.MapFromModel).ToList();
         }
@@ -56,7 +56,7 @@ namespace Infrastructure.DataAccess
 
             await dbContext.Lists
                 .Where(l => l.Id == id)
-                .DeleteAsync(ct);
+                .DeleteAsync();
         }
 
         public async Task<bool> ExistsByName(Guid userId, string name, CancellationToken ct)
@@ -64,7 +64,7 @@ namespace Infrastructure.DataAccess
             using var dbContext = _factory.CreateDataContext();
 
             return await dbContext.Lists
-                .AnyAsync(l => l.UserId == userId && l.Name == name, ct);
+                .AnyAsync(l => l.UserId == userId && l.Name == name);
         }
     }
 }

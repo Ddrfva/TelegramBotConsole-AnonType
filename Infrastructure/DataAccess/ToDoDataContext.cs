@@ -1,6 +1,7 @@
 ﻿using LinqToDB;
 using LinqToDB.Data;
 using Core.DataAccess.Models;
+using Infrastructure.DataAccess.Models;
 
 namespace Infrastructure.DataAccess
 {
@@ -14,5 +15,6 @@ namespace Infrastructure.DataAccess
         public ITable<ToDoUserModel> Users => this.GetTable<ToDoUserModel>();
         public ITable<ToDoListModel> Lists => this.GetTable<ToDoListModel>();
         public ITable<ToDoItemModel> Items => this.GetTable<ToDoItemModel>();
+        public ITable<NotificationModel> Notifications => this.GetTable<NotificationModel>();
     }
 }

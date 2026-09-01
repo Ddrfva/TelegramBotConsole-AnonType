@@ -2,6 +2,7 @@
 using Core.Services;
 using dotenv.net;
 using Infrastructure.DataAccess;
+using Infrastructure.Services;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -26,7 +27,7 @@ namespace TelegramBot_31
             }
 
             var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
-            ?? throw new InvalidOperationException("DATABASE_CONNECTION_STRING not found in .env");
+                ?? throw new InvalidOperationException("DATABASE_CONNECTION_STRING not found in .env");
 
             var factory = new DataContextFactory(connectionString);
 
@@ -38,6 +39,7 @@ namespace TelegramBot_31
             var todoService = new ToDoService(todoRepository, userRepository, maxTasks: 100, maxTaskLength: 500);
             var reportService = new ToDoReportService(todoRepository);
             var listService = new ToDoListService(listRepository);
+            var notificationService = new NotificationService(factory);  // ← НОВЫЙ СЕРВИС
 
             var contextRepository = new InMemoryScenarioContextRepository();
 
@@ -52,16 +54,6 @@ namespace TelegramBot_31
             var botClient = new TelegramBotClient(token);
             var cts = new CancellationTokenSource();
 
-            var backgroundTaskRunner = new BackgroundTaskRunner();
-
-            var resetTask = new ResetScenarioBackgroundTask(
-            TimeSpan.FromHours(1),
-            contextRepository,
-            botClient
-            );
-            backgroundTaskRunner.AddTask(resetTask);
-            backgroundTaskRunner.StartTasks(cts.Token);
-
             var handler = new UpdateHandler(
                 userService,
                 todoService,
@@ -69,6 +61,37 @@ namespace TelegramBot_31
                 listService,
                 contextRepository,
                 scenarios);
+
+            var backgroundTaskRunner = new BackgroundTaskRunner();
+
+            var resetTask = new ResetScenarioBackgroundTask(
+                TimeSpan.FromHours(1),
+                contextRepository,
+                botClient
+            );
+            backgroundTaskRunner.AddTask(resetTask);
+
+            var notificationTask = new NotificationBackgroundTask(
+                notificationService,
+                botClient
+            );
+            backgroundTaskRunner.AddTask(notificationTask);
+
+            var deadlineTask = new DeadlineBackgroundTask(
+                notificationService,
+                userRepository,
+                todoRepository
+            );
+            backgroundTaskRunner.AddTask(deadlineTask);
+
+            var todayTask = new TodayBackgroundTask(
+                notificationService,
+                userRepository,
+                todoRepository
+            );
+            backgroundTaskRunner.AddTask(todayTask);
+
+            backgroundTaskRunner.StartTasks(cts.Token);
 
             var receiverOptions = new ReceiverOptions
             {
@@ -115,7 +138,6 @@ namespace TelegramBot_31
             finally
             {
                 await backgroundTaskRunner.StopTasks(CancellationToken.None);
-                botClient.Close();
                 Console.WriteLine("Бот остановлен.");
             }
         }

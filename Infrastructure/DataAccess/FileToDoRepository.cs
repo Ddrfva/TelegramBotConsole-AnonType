@@ -184,5 +184,18 @@ namespace Infrastructure.DataAccess
             var all = await GetAllByUserId(userId, cancellationToken);
             return all.Where(predicate).ToList();
         }
+
+        public async Task<IReadOnlyList<ToDoItem>> GetActiveWithDeadline(
+            Guid userId,
+            DateTime from,
+            DateTime to,
+            CancellationToken ct)
+        {
+            var all = await GetAllByUserId(userId, ct);
+            return all.Where(t => t.State == 0
+                && t.Deadline >= from
+                && t.Deadline < to)
+                .ToList();
+        }
     }
 }

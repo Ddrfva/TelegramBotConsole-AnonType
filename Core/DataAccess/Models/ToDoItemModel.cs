@@ -42,6 +42,9 @@ namespace Core.DataAccess.Models
         [Column("statechangedatutc")]
         public DateTime? StateChangedAtUtc { get; set; }
 
+        [Column("deadline")]
+        public DateTime? Deadline { get; set; }
+
         [Association(ThisKey = nameof(UserId), OtherKey = nameof(ToDoUserModel.Id))]
         public ToDoUserModel User { get; set; }
 
