@@ -54,9 +54,9 @@ namespace Infrastructure.DataAccess
             return Task.FromResult(_tasks.Count(t => t.UserId == userId && t.State == 0));
         }
 
-        public Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken cancellationToken)
         {
-            return Task.FromResult<IReadOnlyList<ToDoItem>>(_tasks.Where(t => t.UserId == userId && predicate(t)).ToList());
+            return await Task.FromResult<IReadOnlyList<ToDoItem>>(_tasks.Where(t => t.UserId == userId && predicate(t)).ToList());
         }
 
         public Task<IReadOnlyList<ToDoItem>> GetActiveWithDeadline(

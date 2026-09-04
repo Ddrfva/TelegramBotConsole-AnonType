@@ -1,6 +1,7 @@
 ﻿using Core.DataAccess;
 using Core.Entities;
 using Core.Exceptions;
+using Core.Constants;
 
 namespace Core.Services
 {
@@ -8,15 +9,11 @@ namespace Core.Services
     {
         private readonly IToDoRepository _toDoRepository;
         private readonly IUserRepository _userRepository;
-        private readonly int _maxTasks;
-        private readonly int _maxTaskLength;
 
-        public ToDoService(IToDoRepository toDoRepository, IUserRepository userRepository, int maxTasks, int maxTaskLength)
+        public ToDoService(IToDoRepository toDoRepository, IUserRepository userRepository)
         {
             _toDoRepository = toDoRepository;
             _userRepository = userRepository;
-            _maxTasks = maxTasks;
-            _maxTaskLength = maxTaskLength;
         }
 
         public async Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken cancellationToken)
@@ -34,15 +31,15 @@ namespace Core.Services
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Название задачи не может быть пустым");
 
-            if (name.Length > _maxTaskLength)
-                throw new TaskLengthLimitException(name.Length, _maxTaskLength);
+            if (name.Length > AppConstants.MaxTaskLength)
+                throw new TaskLengthLimitException(name.Length, AppConstants.MaxTaskLength);
 
             if (await _toDoRepository.ExistsByName(user.Id, name, cancellationToken))
                 throw new DuplicateTaskException(name);
 
             var activeCount = await _toDoRepository.CountActive(user.Id, cancellationToken);
-            if (activeCount >= _maxTasks)
-                throw new TaskCountLimitException(_maxTasks);
+            if (activeCount >= AppConstants.MaxTasksPerUser)
+                throw new TaskCountLimitException(AppConstants.MaxTasksPerUser);
 
             var newTask = new ToDoItem
             {

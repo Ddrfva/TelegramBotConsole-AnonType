@@ -48,7 +48,7 @@ namespace TelegramBot_31.BackgroundTasks
                             type,
                             text,
                             DateTime.UtcNow,
-                            ct);  // ← добавлен ct
+                            ct);
 
                         Console.WriteLine($"⏰ Создана нотификация о дедлайне для задачи {task.Id} (пользователь {user.Id})");
                     }

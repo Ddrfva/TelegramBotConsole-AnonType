@@ -167,16 +167,16 @@ namespace Infrastructure.DataAccess
             SaveIndex();
         }
 
-        public Task<bool> ExistsByName(Guid userId, string name, CancellationToken cancellationToken)
+        public async Task<bool> ExistsByName(Guid userId, string name, CancellationToken cancellationToken)
         {
-            var items = GetAllByUserId(userId, cancellationToken).GetAwaiter().GetResult();
-            return Task.FromResult(items.Any(t => t.Name == name));
+            var items = await GetAllByUserId(userId, cancellationToken);
+            return items.Any(t => t.Name == name);
         }
 
-        public Task<int> CountActive(Guid userId, CancellationToken cancellationToken)
+        public async Task<int> CountActive(Guid userId, CancellationToken cancellationToken)
         {
-            var active = GetActiveByUserId(userId, cancellationToken).GetAwaiter().GetResult();
-            return Task.FromResult(active.Count);
+            var active = await GetActiveByUserId(userId, cancellationToken);
+            return active.Count;
         }
 
         public async Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken cancellationToken)

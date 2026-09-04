@@ -1,0 +1,33 @@
+@{
+    Layout = "_Layout";
+}
+
+@model IEnumerable<Core.Entities.ToDoUser>
+
+<h1>PhytoPhone Admin</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Telegram ID</th>
+            <th>Username</th>
+            <th>Registration Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Id</td>
+                <td>@user.TelegramUserId</td>
+                <td>@user.TelegramUserName</td>
+                <td>@user.RegisteredAtUtc.ToString("dd.MM.yyyy")</td>
+                <td>
+                    <a href="/Users/Details/@user.Id" class="btn btn-info">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

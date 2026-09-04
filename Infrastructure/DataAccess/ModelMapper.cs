@@ -2,6 +2,7 @@
 using Core.Entities;
 using Core.DataAccess.Models;
 using Infrastructure.DataAccess.Models;
+using System.Text;
 
 namespace Infrastructure.DataAccess
 {
@@ -15,7 +16,7 @@ namespace Infrastructure.DataAccess
             {
                 Id = model.Id,
                 TelegramUserId = model.TelegramUserId,
-                TelegramUserName = model.TelegramUserName,
+                TelegramUserName = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(model.TelegramUserName)),
                 RegisteredAtUtc = model.RegisteredAtUtc
             };
         }
