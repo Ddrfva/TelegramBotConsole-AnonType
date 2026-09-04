@@ -1,11 +1,13 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
+﻿using Core.Entities;
 using Core.Services;
-using Core.Entities;
-using TelegramBot_31.Scenarios;
+using System.Collections.Concurrent;
 using System.Linq;
+using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot_31.Scenarios;
+using System.Collections.Concurrent;
 
 namespace TelegramBot_31.Classes
 {
@@ -17,7 +19,7 @@ namespace TelegramBot_31.Classes
         private readonly IToDoListService _listService;
         private readonly IScenarioContextRepository _contextRepository;
         private readonly IEnumerable<IScenario> _scenarios;
-        private readonly Dictionary<long, ToDoUser> _users = new();
+        private readonly ConcurrentDictionary<long, ToDoUser> _users = new();
 
         public UpdateHandler(
             IUserService userService,

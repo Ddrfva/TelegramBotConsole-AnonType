@@ -8,6 +8,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot_31.Scenarios;
+using Core.Constants;
 
 namespace TelegramBot_31.Scenarios
 {
@@ -45,7 +46,7 @@ namespace TelegramBot_31.Scenarios
 
                 case "Name":
                     var name = message.Text?.Trim();
-                    if (string.IsNullOrWhiteSpace(name) || name.Length > 200)
+                    if (string.IsNullOrWhiteSpace(name) || name.Length > AppConstants.MaxTaskNameLength)
                     {
                         await bot.SendMessage(chatId, "Название должно быть от 1 до 200 символов. Попробуйте снова:", cancellationToken: ct);
                         return ScenarioResult.Transition;

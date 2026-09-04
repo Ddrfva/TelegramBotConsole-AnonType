@@ -1,0 +1,32 @@
+@model Core.Entities.ToDoUser
+
+<h2>Пользователь: @Model.TelegramUserName</h2>
+
+<h3>Списки</h3>
+<ul>
+    @foreach (var list in ViewBag.Lists)
+    {
+        <li>@list.Name</li>
+    }
+</ul>
+
+<h3>Растения</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Вид</th>
+            <th>Статус</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var plant in ViewBag.Plants)
+        {
+            <tr>
+                <td>@plant.Name</td>
+                <td>@plant.Species</td>
+                <td>@((plant.State == 0) ? "Активно" : "Завершено")</td>
+            </tr>
+        }
+    </tbody>
+</table>

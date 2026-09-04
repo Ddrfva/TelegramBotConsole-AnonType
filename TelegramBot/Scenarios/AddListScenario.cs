@@ -7,6 +7,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot_31.Scenarios;
+using Core.Constants;
 
 namespace TelegramBot_31.Scenarios
 {
@@ -43,7 +44,7 @@ namespace TelegramBot_31.Scenarios
 
                 case "Name":
                     var listName = message.Text?.Trim();
-                    if (string.IsNullOrWhiteSpace(listName) || listName.Length > 10)
+                    if (string.IsNullOrWhiteSpace(listName) || listName.Length > AppConstants.MaxListNameLength)
                     {
                         await bot.SendMessage(chatId, "Название списка должно быть от 1 до 10 символов. Попробуйте снова:", cancellationToken: ct);
                         return ScenarioResult.Transition;

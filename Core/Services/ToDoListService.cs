@@ -1,6 +1,7 @@
 ﻿using Core.DataAccess;
 using Core.Entities;
 using Core.Exceptions;
+using Core.Constants;
 
 namespace Core.Services
 {
@@ -18,8 +19,8 @@ namespace Core.Services
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Название списка не может быть пустым");
 
-            if (name.Length > 10)
-                throw new ArgumentException("Название списка не может быть длиннее 10 символов");
+            if (name.Length > AppConstants.MaxListNameLength)
+                throw new ArgumentException($"Название списка не может быть длиннее {AppConstants.MaxListNameLength} символов");
 
             if (await _listRepository.ExistsByName(user.Id, name, ct))
                 throw new DuplicateTaskException($"Список с именем '{name}' уже существует");

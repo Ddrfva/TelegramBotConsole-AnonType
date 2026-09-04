@@ -1,0 +1,28 @@
+@model IEnumerable<Core.Entities.ToDoUser>
+
+    <h1>Пользователи</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Telegram ID</th>
+                <th>Имя</th>
+                <th>Дата регистрации</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.TelegramUserId</td>
+                    <td>@user.TelegramUserName</td>
+                    <td>@user.RegisteredAtUtc.ToString("dd.MM.yyyy")</td>
+                    <td>
+                        <a href="/Users/Details/@user.Id" class="btn btn-info">Подробнее</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
